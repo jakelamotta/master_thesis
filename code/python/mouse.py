@@ -1,39 +1,78 @@
 import thread
+import time
 
-try:
-	mouse1_ = file('/dev/input/mouse0')
+#Global variable containing dx and dy readings from each sensor respectively
+coords = [0,0,0,0]
 
-except IOError:
-	print "Mouse 0 was not found"
+#Init each mouse
+def initMice():
+	mouse1_, mouse2_ = None,None
+	try:
+		mouse1_ = file('/dev/input/mouse0')
 
-try:
-	mouse2_ = file('/dev/input/mouse1')
-except IOError:
-	print "Mouse 1 was not found"
+	except IOError:
+		try:
+			mouse1_ = file('/dev/input/mouse2')
+		except IOError:
+			print "Mouse 0 or 2 wasnt found, add new mouse"
 
-try:
-	key = file('/dev/input/keyboard')
-except IOError:
-	print "Keyboard not found"
+	try:
+		mouse2_ = file('/dev/input/mouse1')
+	except IOError:
+		print "Mouse 1 was not found"
+	
+	return mouse1_, mouse2_
+	
 
-
-def to_signed(n):
+def toSigned(n):
         return n - ((0x80 & n) << 1)
 
-
-def mouse(m,mystring,*args):
+#Read mouse input, data that is retrieved is delta x and delta y values for the mouse
+def readMouse(m,mystring,*args):
+	global coords
 
         while True:
                 status, dx, dy = tuple(ord(c) for c in m.read(3))
-		dx = to_signed(dx)
-                dy = to_signed(dy)
-                print "%#02x %d %d" % (status, dx, dy)
+		dx = toSigned(dx)
+                dy = toSigned(dy)
+		
+		if mystring == 'thread1':
+			coords[0] = dx
+			coords[1] = dy                
+		elif mystring == 'thread2':
+			coords[2] = dx
+			coords[2] = dy
 
-try:
-        thread.start_new_thread(mouse,(mouse1_,'thread1',1))
-        thread.start_new_thread(mouse,(mouse2_,'thread2',2))
-except:
-        print "Error: unable to start thread"
+		#print "%#02x %d %d" % (status, dx, dy)
 
-while 1:
-        pass 
+######################################
+## x = position on x axis
+## y = position on y axis
+## angle = angle in x,y-plane
+## dt = time intervall
+## forVel = forward velocity
+######################################
+def updatePosition(x,y,angle,dt,forVel):
+		
+	newAngle = angle+rotationVel*dt
+	newX = x + sideVel*cos(newAngle) - forVel*sin(newAngle)
+	newY = y+ sideVel*sin(newAngle) + forVel*cos(newAngle)
+
+	return newX, newY, newAngle
+
+def merge():
+
+
+
+if __name__ == "__main__":
+	m1,m2 = initMice()
+
+	try:
+	        thread.start_new_thread(readMouse,(m1,'thread1',1))
+	        thread.start_new_thread(readMouse,(m2,'thread2',2))
+	except:
+	        print "Error: unable to start thread"
+
+	while 1:
+	        print coords
+		time.sleep(.0001)
