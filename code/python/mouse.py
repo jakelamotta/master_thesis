@@ -62,6 +62,7 @@ def updatePosition(x,y,angle,dt,forVel):
 
 def merge():
 
+	pass	
 
 
 if __name__ == "__main__":
@@ -75,4 +76,5 @@ if __name__ == "__main__":
 
 	while 1:
 	        print coords
-		time.sleep(.0001)
+		coords = [0,0,0,0]
+		time.sleep(1)
