@@ -3,26 +3,26 @@ import time
 
 #Global variable containing dx and dy readings from each sensor respectively
 coords = [0,0,0,0]
+mice = ['mouse0','mouse1','mouse2','mouse3','mouse4',]
 
 #Init each mouse
-def initMice():
+def initMice(first,second):
 	mouse1_, mouse2_ = None,None
 	try:
-		mouse1_ = file('/dev/input/mouse0')
+		str1 = '/dev/input/' + mice[first]
+		print str1
+		mouse1_ = file(str1)
 
 	except IOError:
-		try:
-			mouse1_ = file('/dev/input/mouse2')
-		except IOError:
-			print "Mouse 0 or 2 wasnt found, add new mouse"
+		print "Mouse 0 or 2 wasnt found, add new mouse"
 
-	try:
-		mouse2_ = file('/dev/input/mouse1')
+	try:	
+		str2 = '/dev/input/'+mice[second]
+		mouse2_ = file(str2)
 	except IOError:
 		print "Mouse 1 was not found"
 	
 	return mouse1_, mouse2_
-	
 
 def toSigned(n):
         return n - ((0x80 & n) << 1)
@@ -43,7 +43,6 @@ def readMouse(m,mystring,*args):
 			coords[2] = dx
 			coords[2] = dy
 
-		#print "%#02x %d %d" % (status, dx, dy)
 
 ######################################
 ## x = position on x axis
@@ -66,15 +65,16 @@ def merge():
 
 
 if __name__ == "__main__":
-	m1,m2 = initMice()
+	m1,m2 = initMice(0,1)
 
 	try:
 	        thread.start_new_thread(readMouse,(m1,'thread1',1))
 	        thread.start_new_thread(readMouse,(m2,'thread2',2))
 	except:
 	        print "Error: unable to start thread"
-
-	while 1:
+	t = 0
+	while t < 3000:
 	        print coords
 		coords = [0,0,0,0]
-		time.sleep(1)
+		time.sleep(0.001)
+		t += 1
