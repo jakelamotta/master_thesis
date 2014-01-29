@@ -14,7 +14,7 @@ def initMice(first,second):
 		mouse1_ = file(str1)
 
 	except IOError:
-		print "Mouse 0 or 2 wasnt found, add new mouse"
+		print "Mouse 2 was not found"
 
 	try:	
 		str2 = '/dev/input/'+mice[second]
@@ -28,7 +28,7 @@ def toSigned(n):
         return n - ((0x80 & n) << 1)
 
 #Read mouse input, data that is retrieved is delta x and delta y values for the mouse
-def readMouse(m,mystring,*args):
+def readMouse(m,thread,*args):
 	global coords
 
         while True:
@@ -36,10 +36,10 @@ def readMouse(m,mystring,*args):
 		dx = toSigned(dx)
                 dy = toSigned(dy)
 		
-		if mystring == 'thread1':
+		if thread == 'thread1':
 			coords[0] = dx
 			coords[1] = dy                
-		elif mystring == 'thread2':
+		elif thread == 'thread2':
 			coords[2] = dx
 			coords[2] = dy
 
@@ -67,14 +67,18 @@ def merge():
 if __name__ == "__main__":
 	m1,m2 = initMice(0,1)
 
+	#One thread for each mouse that listens for mouse data
 	try:
 	        thread.start_new_thread(readMouse,(m1,'thread1',1))
 	        thread.start_new_thread(readMouse,(m2,'thread2',2))
 	except:
 	        print "Error: unable to start thread"
+	
+	#Temp code, breaks loop after 
 	t = 0
 	while t < 3000:
 	        print coords
 		coords = [0,0,0,0]
 		time.sleep(0.001)
 		t += 1
+
