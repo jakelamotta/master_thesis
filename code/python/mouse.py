@@ -1,5 +1,6 @@
 import thread
 import time
+import sys
 
 #Global variable containing dx and dy readings from each sensor respectively
 coords = [0,0,0,0]
@@ -10,7 +11,7 @@ def initMice(first,second):
 	mouse1_, mouse2_ = None,None
 	try:
 		str1 = '/dev/input/' + mice[first]
-		print str1
+		
 		mouse1_ = file(str1)
 
 	except IOError:
@@ -60,25 +61,43 @@ def updatePosition(x,y,angle,dt,forVel):
 	return newX, newY, newAngle
 
 def merge():
-
-	pass	
-
-
-if __name__ == "__main__":
 	m1,m2 = initMice(0,1)
+	global coords
 
 	#One thread for each mouse that listens for mouse data
 	try:
 	        thread.start_new_thread(readMouse,(m1,'thread1',1))
-	        thread.start_new_thread(readMouse,(m2,'thread2',2))
+	        thread.start_new_thread(readMouse,(m1,'thread2',2))
 	except:
 	        print "Error: unable to start thread"
 	
 	#Temp code, breaks loop after 
 	t = 0
-	while t < 3000:
-	        print coords
+	sum_ = 0
+	a = []
+	while t < 200000:
+		
+		
+				
+		if sum(coords) < 0:
+			sum_ = -sum(coords)
+		else:
+			sum_ = sum(coords)
+			        
+		if sum_ > 0:
+			print t#print 1#a.append(1)
+		else:
+			pass#print 0
+
 		coords = [0,0,0,0]
-		time.sleep(0.001)
+		time.sleep(0.0001)
 		t += 1
+
+	return a	
+
+
+if __name__ == "__main__":
+	s=merge()
+	#sys.stdout.write(s)
+
 
