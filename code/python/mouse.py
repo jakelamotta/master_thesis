@@ -1,3 +1,4 @@
+import json
 import thread
 import time
 import sys
@@ -31,11 +32,11 @@ def toSigned(n):
 #Read mouse input, data that is retrieved is delta x and delta y values for the mouse
 def readMouse(m,thread,*args):
 	global coords
-
-        while True:
-                status, dx, dy = tuple(ord(c) for c in m.read(3))
+	
+	while True:
+		status, dx, dy = tuple(ord(c) for c in m.read(3))
 		dx = toSigned(dx)
-                dy = toSigned(dy)
+		dy = toSigned(dy)
 		
 		if thread == 'thread1':
 			coords[0] = dx
@@ -60,14 +61,14 @@ def updatePosition(x,y,angle,dt,forVel):
 
 	return newX, newY, newAngle
 
-def merge():
+def readData():
 	m1,m2 = initMice(0,1)
 	global coords
 
 	#One thread for each mouse that listens for mouse data
 	try:
-	        thread.start_new_thread(readMouse,(m1,'thread1',1))
-	        thread.start_new_thread(readMouse,(m1,'thread2',2))
+	        thread.start_new_thread(readMouse,(m2	,'thread1',1))
+	        #thread.start_new_thread(readMouse,(m1,'thread2',2))
 	except:
 	        print "Error: unable to start thread"
 	
@@ -75,29 +76,48 @@ def merge():
 	t = 0
 	sum_ = 0
 	a = []
-	while t < 200000:
-		
-		
-				
+	timestamp = []
+	start = time.time() 	
+	
+	while True:
+			
 		if sum(coords) < 0:
 			sum_ = -sum(coords)
 		else:
 			sum_ = sum(coords)
 			        
 		if sum_ > 0:
-			print t#print 1#a.append(1)
-		else:
-			pass#print 0
+			a.append(t)
+			timestamp.append(time.time())
 
 		coords = [0,0,0,0]
-		time.sleep(0.0001)
 		t += 1
+		if t == 20000000:
+			break
 
-	return a	
+	end = time.time()
+	delta = end-start
+	print "ran for %d" % (delta)
+	return a,timestamp	
 
 
 if __name__ == "__main__":
-	s=merge()
-	#sys.stdout.write(s)
+	s,a=readData()	
+	
+	try:
+		f = open('/home/kristian/master_thesis/code/python/t.txt','w')
+		output = json.dumps(s)
+		output.replace('[','')
+		output.replace(']',',')
+		f.write(output)
+	except IOError:
+		print "could not write to file"
 
-
+	try:
+		f = open('/home/kristian/master_thesis/code/python/time.txt','w')
+		output = json.dumps(a)
+		output.replace('[','')
+		output.replace(']',',')
+		f.write(output)
+	except IOError:
+		print "Could not write to file"
