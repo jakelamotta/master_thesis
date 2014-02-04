@@ -39,7 +39,7 @@ def readMouse(m,thread,*args):
 		dy = toSigned(dy)
 		
 		if thread == 'thread1':
-			coords[0] = dx
+			coords[0] = dy
 			coords[1] = dy                
 		elif thread == 'thread2':
 			coords[2] = dx
@@ -80,19 +80,19 @@ def readData():
 	start = time.time() 	
 	
 	while True:
-			
+		sum_ = 0	
 		if sum(coords) < 0:
 			sum_ = -sum(coords)
 		else:
 			sum_ = sum(coords)
 			        
 		if sum_ > 0:
-			a.append(t)
+			a.append(sum_)
 			timestamp.append(time.time())
 
 		coords = [0,0,0,0]
 		t += 1
-		if t == 20000000:
+		if t == 500000000:
 			break
 
 	end = time.time()
