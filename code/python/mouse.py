@@ -21,15 +21,21 @@ class Mouse(threading.Thread):
 class MouseHandler(object):
 	
 	def __init__(self):
-		self.mice = []
+		self.sensors = []
+		self.triggerMouse = None
 		self.mouseIDs = ['mouse0','mouse1','mouse2','mouse3','mouse4',]
 		
+	def startMiceReading():
+		pass
+	
+	def startTriggerReading():
+		pass
 
 	def addMouse(mouse):
-		self.mice.append(mouse)
+		self.sensors.append(mouse)
 
 	def removeMouse(mouse):
-		self.mice.remove(mouse)
+		self.sensors.remove(mouse)
 		
 		
 class SensorMouse(Mouse):
