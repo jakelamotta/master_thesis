@@ -8,15 +8,41 @@ mice = ['mouse0','mouse1','mouse2','mouse3','mouse4',]
 coords = [0,0,0,0]
 
 
-class Mouse(threading.Thread):
+class Mouse(object):
 
-	def __init__(self,identifier):
+	def idSelf(self,*args):
+		start = time.time()
+
+		if self.mouse != None:
+
+			status,dx,dy = tuple(ord(c) for c in self.mouse.read(3))
+			if dx != 0 or dy != 0:
+				self.id = self.number
+		
+			elif round(time.time()-start) > 10.0:
+				self.id =  -2
+				
+
+	def __init__(self,identifier,nr):
+		self.mice = ['mouse0','mouse1','mouse2','mouse3','mouse4']
+		self.number = nr
 		self.threadid = identifier
 		self.prefix = '/dev/input/'
+		self.mouse = None
+		
+		try:
+			str1 = self.prefix + self.mice[self.number]
+			self.mouse = file(str1)
+		except IOError:
+			print "Mouse "+self.threadid+" was not found"
+		
+		#threading.Thread.__init__(self)
 
-		threading.Thread.__init__(self)
-		self.run()
+		#self.start()
+		self.id = -1
   	
+	
+			
 
 class MouseHandler(object):
 	
@@ -151,7 +177,7 @@ def readMouse(m,thread,*args):
 		status, dx, dy = tuple(ord(c) for c in m.read(3))
 		dx = toSigned(dx)
 		dy = toSigned(dy)
-	
+		
 		if thread == 'thread1':
 			coords[0] = dx
 			coords[1] = dy                
@@ -207,13 +233,13 @@ def measure():
 
 
 if __name__ == "__main__":
-	samples = [measure() for i in range(10)]
+	#samples = [measure() for i in range(10)]
 
-	print reduce( lambda a,b:a+b, [measure()[2] for i in range(1000)], 0.0) / 1000.0	
+	#print reduce( lambda a,b:a+b, [measure()[2] for i in range(1000)], 0.0) / 1000.0	
 		
-	#s,a=readData()	
-
-	
+	#s,a=readData()
+	m1,m2 = initMice(0,1)	
+	readMouse(m1,None,None)	
 	
 	#try:
 	#	f = open('/home/kristian/master_thesis/code/python/t.txt','w')
