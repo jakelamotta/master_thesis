@@ -1,6 +1,5 @@
 import json
 import thread
-import threading
 import time
 import sys
 
@@ -36,9 +35,6 @@ class Mouse(object):
 		except IOError:
 			print "Mouse "+self.threadid+" was not found"
 		
-		#threading.Thread.__init__(self)
-
-		#self.start()
 		self.id = -1
   	
 	
