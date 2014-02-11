@@ -2,6 +2,7 @@ import json
 import thread
 import time
 import sys
+import utilities
 
 mice = ['mouse0','mouse1','mouse2','mouse3','mouse4',]
 coords = [0,0,0,0]
@@ -33,8 +34,8 @@ class Mouse(object):
 			str1 = self.prefix + self.mice[self.number]
 			self.mouse = file(str1)
 		except IOError:
-			print "Mouse "+self.threadid+" was not found"
-		
+			utilities.FileHandler.logException("Mouse "+self.threadid+" was not found")
+
 		self.id = -1
   	
 	
