@@ -24,59 +24,41 @@ class Mouse(object):
 				
 
 	def __init__(self,identifier,nr):
-		self.mice = ['mouse0','mouse1','mouse2','mouse3','mouse4']
+		self.mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
 		self.number = nr
 		self.threadid = identifier
 		self.prefix = '/dev/input/'
 		self.mouse = None
-		
+				
 		try:
-			str1 = self.prefix + self.mice[self.number]
+			str1 = self.prefix + self.mice_[self.number]
 			self.mouse = file(str1)
 		except IOError:
-			utilities.FileHandler.logException("Mouse "+self.threadid+" was not found")
+			utilities.FileHandler.logException("Mouse "+self.threadid+" was not found:"+str1)
 
 		self.id = -1
   	
 	
 			
 
-class MouseHandler(object):
-	
-	def __init__(self):
-		self.sensors = []
-		self.triggerMouse = None
-		self.mouseIDs = ['mouse0','mouse1','mouse2','mouse3','mouse4',]
-		
-	def startMiceReading():
-		pass
-	
-	def startTriggerReading():
-		pass
 
-	def addMouse(mouse):
-		self.sensors.append(mouse)
-
-	def removeMouse(mouse):
-		self.sensors.remove(mouse)
-		
 		
 class SensorMouse(Mouse):
 
-	def __init__(self):
+	def __init__(self,identifier,nr):
 		self.coords = [0,0]
-		super().__init__(self)
-		readMouse()
+		super(SensorMouse,self).__init__(identifier,nr)
 
 	#Read mouse input, data that is retrieved is delta x and delta y values for the mouse
 	def readMouse():
-		while True:
-			status, dx, dy = tuple(ord(c) for c in self.read(3))
-			dx = toSigned(dx)
-			dy = toSigned(dy)
+		status, dx, dy = tuple(ord(c) for c in self.read(3))
+		dx = toSigned(dx)
+		dy = toSigned(dy)
 		
-			self.coords[0] = dx
-			self.coords[1] = dy
+		self.coords[0] = dx
+		self.coords[1] = dy
+		return self.coords
+			
 
 
 class TriggerMouse(Mouse):
@@ -163,8 +145,7 @@ def initMice(first,second):
 			print "Mouse 1 was not found"
 	return mouse1_, mouse2_
 
-def toSigned(n):
-	return n - ((0x80 & n) << 1)
+
 
 #Read mouse input, data that is retrieved is delta x and delta y values for the mouse
 def readMouse(m,thread,*args):
