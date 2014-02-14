@@ -2,6 +2,7 @@ import utilities
 import thread
 import time
 import traceback
+import sys
 
 coords = [0,0,0,0]		        
 
@@ -103,12 +104,15 @@ class MouseHandler:
 				sum_ = sum(coords)
 			
 			if sum_ > 0:
-				#a.append(t)
-				#timestamp.append(time.time())
+				a.append(t)
+				timestamp.append(time.time())
 				print padNumber(coords[0]),padNumber(coords[1]),padNumber(coords[2]),padNumber(coords[3])
 			
 			coords = [0,0,0,0]
-			t += 1					
+			t += 1				
+	
+	def stopReadData():
+		pass
 					
 
 	def startMiceReading():
@@ -123,6 +127,26 @@ class MouseHandler:
 	def removeMouse(self,mouse):
 		self.sensors.remove(mouse)
 
+def StartSocket(port):
+	run = False;
+
+	print("Running on port " + str(port))
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.bind(('localhost',port))
+	s.listen(5)
+	s.settimeout(10)	
+	handler = MouseHandler()
+	    	
+	while True:
+		connection, addr = s.accept()     # Establish connection with client.
+		print 'Got connection from', addr 
+		run = run and False		     # Set whether recording should run or not
+			
+		connection.send(str(run))	     	
+		connection.close()                # Close the connection
+		if not run:
+			break
+
 def padNumber(number):
 	newNr = str(number)
 	while len(newNr) != 5:
@@ -130,6 +154,12 @@ def padNumber(number):
 	return newNr
 		
 if __name__ == '__main__':
+
+	if len(sys.argv) > 1:
+		for i in range(1,len(sys.argv):
+			
+
+
 	handler = MouseHandler()
 	handler.readData()
 

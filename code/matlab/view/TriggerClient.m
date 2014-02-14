@@ -8,9 +8,10 @@ import java.io.*
 
 input_socket = [];
 recording_started = false;
+%system('python /home/kristian/master_thesis/code/python/client.py');
 
 while true
-    
+     
     if (recording_started)
         fprintf(1, 'Recording started\n');
         break;
@@ -19,7 +20,7 @@ while true
     try
         % throws if unable to connect
         input_socket = Socket(host, port);
-        
+        fprintf(1,'connceted');
         % get a buffered data input stream from the socket
         input_stream   = input_socket.getInputStream;
         d_input_stream = DataInputStream(input_stream);

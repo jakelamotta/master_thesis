@@ -140,6 +140,12 @@ function run_btn_Callback(hObject, eventdata, handles)
         a = a+6;
     end
     
+    %Save data to file with default filename as timestamp on minute
+    %precision
+    c = clock;
+    filename = strcat(int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'.mat');
+    save(filename,'result');    
+    
     set(handles.axes1,'UserData',time);
     plot(handles.axes1,result);
     
@@ -213,7 +219,8 @@ function reset_menu_item_Callback(hObject, eventdata, handles)
 function save_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to save_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% handles    structure with handles and user data (see GUIDATA)   
+    
 
 
 % --------------------------------------------------------------------

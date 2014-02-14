@@ -1,14 +1,6 @@
-import time
+import sys
 
-def test():
-	t = 0
-	start = time.time()
-	while t < 30000:
-		t += 1
-		time.sleep(0.002) 
-
-	elapsed = time.time()-start
-	print elapsed
-
-
-test()
+if __name__ == '__main__':
+	
+	for arg in sys.argv:
+		print arg

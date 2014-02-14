@@ -22,7 +22,7 @@ function varargout = Trigger(varargin)
 
 % Edit the above text to modify the response to help Trigger
 
-% Last Modified by GUIDE v2.5 13-Feb-2014 12:58:59
+% Last Modified by GUIDE v2.5 14-Feb-2014 14:48:54
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -122,3 +122,12 @@ function network_cb_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of network_cb
+
+
+% --- Executes on button press in timer_cb.
+function timer_cb_Callback(hObject, eventdata, handles)
+% hObject    handle to timer_cb (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of timer_cb

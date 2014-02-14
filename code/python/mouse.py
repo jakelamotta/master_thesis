@@ -1,5 +1,5 @@
 import json
-import thread
+import threading
 import time
 import sys
 import utilities
@@ -8,7 +8,7 @@ mice = ['mouse0','mouse1','mouse2','mouse3','mouse4',]
 coords = [0,0,0,0]
 
 
-class Mouse(object):
+class Mouse(threading.thread):
 
 	def idSelf(self,*args):
 		start = time.time()
@@ -23,10 +23,8 @@ class Mouse(object):
 				self.id =  -2
 				
 
-	def __init__(self,identifier,nr):
-		self.mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
+	def __init__(self,nr):
 		self.number = nr
-		self.threadid = identifier
 		self.prefix = '/dev/input/'
 		self.mouse = None
 				
@@ -37,58 +35,38 @@ class Mouse(object):
 			utilities.FileHandler.logException("Mouse "+self.threadid+" was not found:"+str1)
 
 		self.id = -1
+		
+		super(Mouse,self).__init__()
   	
+
+	
+		
 	
 			
+class IdMouse(Mouse):
 
+	pass
 
 		
 class SensorMouse(Mouse):
 
 	def __init__(self,identifier,nr):
-		self.coords = [0,0]
-		super(SensorMouse,self).__init__(identifier,nr)
+		self.ident = identifier		
+		super(SensorMouse,self).__init__()
 
-	#Read mouse input, data that is retrieved is delta x and delta y values for the mouse
-	def readMouse():
-		status, dx, dy = tuple(ord(c) for c in self.read(3))
-		dx = toSigned(dx)
-		dy = toSigned(dy)
-		
-		self.coords[0] = dx
-		self.coords[1] = dy
-		return self.coords
-			
-
-
-class TriggerMouse(Mouse):
-	
-	def __init__(self, _threshold):
-		self.timeReference = 0
-		self.triggered = False
-		self.threshold = _threshold
-		super().__init__(self)
-		readMouse()
-	
-	def readMouse():
+	def run(self):
+		global coords
 		while True:
-			status,dx,dy = tuple(ord(c) for c in self.read(3))
-			dx = toSigned(dx)
-			dy = toSigned(dy)
-	
-			if dx != 0 or dy != 0:
-				if(self.timeReference == 0):
-					self.timeReference = time.time() 
-								
-				self.triggered = True
-				
-				if not aboveThreshold():
-					self.triggerd = False
-					self.timeReference = 0
-
-	def aboveThreshold():
-		
-		return True 
+			status, dx, dy = tuple(ord(c) for c in self.mouse.read(3))
+			dx = utilities.toSigned(dx)
+			dy = utilities.toSigned(dy)
+					
+			if self.ident == 'm1':			
+				coords[0] = dx
+				coords[1] = dy
+			elif self.iden == 'm2':			
+				coords[2] = dx
+				coords[3] = dy		
 		
 class Fly(object):
 
