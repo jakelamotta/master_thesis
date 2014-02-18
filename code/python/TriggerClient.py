@@ -4,8 +4,8 @@ import sys
 def sendTrigger(param):
 	
 	s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)	
-	host = '127.0.0.1'
-	port = 3000
+	host = '130.238.33.175'
+	port = 4444
 	s.connect((host,port))
 
 	if param == 'quit':

@@ -88,8 +88,13 @@ function notnow_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to notnow_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    NotNowQuery;
-    close OnStartup;
+    
+    q = questdlg('Without selecting a configuration option you will not be able to run an experiment. Do you still want to continue?');
+    
+    if strcmp('Yes',q)
+        MainWindow;
+        close OnStartup;
+    end
 
 % --- Executes on button press in load_btn.
 function load_btn_Callback(hObject, eventdata, handles)

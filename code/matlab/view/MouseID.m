@@ -112,8 +112,11 @@ function id_btn_Callback(hObject, eventdata, handles)
     %the actual identification 
     [~,output] = system('echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/mouseID.py');
     
+    %Functionality to strip the resulting output from any non-digit characters
+    index = isstrprop(output,'digit');
+    output(~index) = '';
+    output = output(find(index,1):end)
     
-    output
     %If the ouput is of the proper form a succes-message will be shown
     if (str2num(output(1)) > -1)
         title = 'Success! Mouse identified.';

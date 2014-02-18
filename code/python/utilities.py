@@ -40,10 +40,22 @@ class FileHandler:
 	
 	@staticmethod
 	def logException(exception_message):
-		output = exception_message+' '+time.asctime(time.localtime())+'***********'
+		output = exception_message+' '+time.asctime(time.localtime())+'\n'
 		FileHandler.saveToFile(output,'log.txt','a')
 
-
+def padNumber(number):
+	newNr = str(number)
+	while len(newNr) != 5:
+		newNr = '0'+newNr	
+	return newNr
 
 def toSigned(n):
 	return n - ((0x80 & n) << 1)
+
+def 2DCoordsTo3DCoords(dx1,dx2,dy1,dy2):
+
+	newdx = 0
+	newdy = 0
+	newAngle = 0
+
+	return newdx,newdy,newAngle

@@ -16,6 +16,7 @@ class MouseHandler(threading.Thread):
 		self.triggerMouse = None
 		self.mouseIDs = utilities.FileHandler.loadFromFile('mice.txt');
 		self.run_ = True
+		self.pause = False
 
 		self.s1 = SensorMouse("sensor1",self.mouseIDs["sensor1"],self)
 		self.s2 = SensorMouse("sensor2",self.mouseIDs["sensor2"],self)
@@ -43,10 +44,10 @@ class MouseHandler(threading.Thread):
 			else:
 				sum_ = sum(coords)
 			
-			if sum_ > 0:
+			if sum_ > 0 and not self.pause:
 				#.append(t)
 				timestamp.append(time.time())
-				print padNumber(coords[0]),padNumber(coords[1]),padNumber(coords[2]),padNumber(coords[3])
+				print utilities.padNumber(coords[0]),padNumber(coords[1]),padNumber(coords[2]),padNumber(coords[3])
 			
 			coords = [0,0,0,0]		
 		
@@ -115,51 +116,70 @@ class SensorMouse(AbstractMouse):
 def parseArguments(args):
 	pass		
 
-def padNumber(number):
-	newNr = str(number)
-	while len(newNr) != 5:
-		newNr = '0'+newNr	
-	return newNr
 
-def TriggerSocket(port):
-	
-	#print("Running on port " + str(port))
+def openTriggerSocket(port):
+	#print 'listening on port: ',port
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.bind(('localhost',port))
+		s.bind(('130.238.33.175',port))
 		s.listen(1)
-		s.settimeout(30)	
+		s.settimeout(120)	
 
 		connection, addr = s.accept()     # Establish connection with client.
-		handler = MouseHandler()
-				
-		handler.start()
+		#connection.send("T")		     	
+		#print s.gethostname()
+		if connection.recv(1) == 's':
+			handler = MouseHandler()
+			handler.start()
 			
-		#print 'Got connection from', addr 
-	
-		address = addr
-		connection.send(str("T"))	     	
-		#connection.close()
-
-		while True:
+		while handler.run_:
+			
+			connection.close()
 			connection, addr = s.accept()     # Establish connection with client.
 			
-			if address[0] == addr[0]:
-				handler.run_ = False
-				handler.s1.mouse
-				connection.send(str(handler.run_))
-				break
-		
+			trigger = connection.recv(1)
+			
+			if trigger == 'p':
+				handler.pause = True
+				connection.close()
+				
+				connection,addr = s.accept()
+				handler.pause = False
+			else:
+				handler.run_ = False	
+			
+			
+			
 	except Exception:
 		utilities.FileHandler.logException(traceback.format_exc())	
 	finally: 
 		s.shutdown(socket.SHUT_RDWR)
+
 		try:
 			connection.close()                # Close the connection
 		except UnboundLocalError:
 			pass
 
+#Run DAQ with timer set in ms
+def runWithTimer(time):
+
+	start = time.time()
+
+	handler = MouseHandler()
+	handler.start()
+	current = time.time()-start
+	
+	while time < current:
+		current = time.time()-start
+
+	handler.run_ = False	
+		
+	
+
 	
 if __name__ == '__main__':
-	TriggerSocket(3000)
+	
+	#args = parseArgs(sys.argvs)	
+		
+	openTriggerSocket(4444)
 

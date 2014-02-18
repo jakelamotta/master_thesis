@@ -9,8 +9,9 @@ s.connect((host,port))
 
 
 while True:
-	print s.recv(1)
-	if s.recv(1) == 'T' or s.recv(1) == 'F':
+	msg = s.recv(1)
+	if msg == 'T' or msg == 'F':
+		print msg
 		break
 	
 s.close()

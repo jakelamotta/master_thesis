@@ -63,7 +63,7 @@ guidata(hObject, handles);
 
 config = getappdata(0,'config');
 
-if config.network_trigger
+if true%config.network_trigger
     set(handles.network_rdbtn,'value',1);
 elseif config.timer_trigger
      set(handles.timer_rdbtn,'value',1);
@@ -120,31 +120,44 @@ function run_btn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     config = getappdata(0,'config');
     
-    if get(handles.network_rdbtn,'value') == 1
-        TriggerServer(config.port);
-    elseif get(handles.timer_rdbtn,'value') == 1
-        
-    end
-        
-    [~,output] = system('echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/mouseHandler.py');
+%     if get(handles.network_rdbtn,'value') == 1
+%         TriggerServer(config.port);
+%     elseif get(handles.timer_rdbtn,'value') == 1
+%         
+%     end
     
+    %m = msgbox('System is running, please wait for recording to finish');
+    set(handles.run_btn,'String','Running..');
+    drawnow;
+    msgbox('Data aquisiton has started, please wait for ');
+    [~,output] = system('echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py');
+    set(handles.run_btn,'String','Run');
+    drawnow;
     result = [0];
-    time = [];
-    for i=1:(length(output)/6)-1
-        if i == 1
-            result(1) = str2num(output(1:5));
-            a = 6;
+    time = [1];
+    
+    try
+        
+        for i=1:(length(output)/6)-1
+            if i == 1
+
+                result(1) = str2num(output(1:5));
+                a = 6;
+            end
+
+            time(end+1) = i+1;
+            result(end+1) = str2num(output(a:a+5));
+            a = a+6;
         end
-        time(end+1) = i+1;
-        result(end+1) = str2num(output(a:a+5));
-        a = a+6;
+    catch Exception
+        errordlg('Something went wrong with the data, please try again', 'Corrupt data');        
     end
     
     %Save data to file with default filename as timestamp on minute
     %precision
     c = clock;
     filename = strcat(int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'.mat');
-    save(filename,'result');    
+    %save(filename,'result');    
     
     set(handles.axes1,'UserData',time);
     plot(handles.axes1,result);

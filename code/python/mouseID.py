@@ -1,6 +1,6 @@
-import mouse
-import thread
+import DAQ
 import utilities
+import traceback
 
 	
 def idMouse():
@@ -8,8 +8,9 @@ def idMouse():
 	mice = []	
 	
 	for i in range(0,3):
-		m = mouse.Mouse("",i)
-		t = thread.start_new_thread(m.idSelf,("t%d" % (i),2))
+		m = DAQ.IdMouse(i)
+		m.setDaemon(True)
+		m.start()	
 		mice.append(m)		
 
 	run = True	
@@ -19,8 +20,9 @@ def idMouse():
 				miceMapping['mouse'] = mouse_.id
 				micePositions.remove(mouse_.id)				
 				run = False
+	
+	idSensors()
 
-	idSensors()	
 	print miceMapping['mouse']
 	print miceMapping['sensor2']
 	print miceMapping['sensor1']
