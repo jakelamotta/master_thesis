@@ -58,6 +58,9 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+config = Configuration();
+setappdata(0,'config',config);
+
 % UIWAIT makes Trigger wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
@@ -85,12 +88,14 @@ function next_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to next_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    config = Configuration(-1,-1,-1);
-    
+    config = getappdata(0,'config');
+
     if get(handles.network_cb,'value') == 1
-        config.setNetworkTrigger();
+        config.setNetworkTrigger('network');
     elseif get(handles.timer_cb,'value') == 1
-        config.enableTimerTrigger();
+        config.setNetworkTrigger('timer');
+    else
+        config.setNetworkTrigger('no_trigger');
     end
     
     setappdata(0,'config',config);

@@ -1,22 +1,29 @@
 import socket
 import sys
+import traceback
 
 def sendTrigger(param):
-	
-	s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)	
-	host = '130.238.33.175'
-	port = 4444
-	s.connect((host,port))
+	try:
 
-	if param == 'quit':
-		s.sendall('q')
-	elif param == 'pause':
-		s.sendall('p')
-	elif param == 'start':
-		s.sendall('s')
-	print s.getpeername()
+		s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)	
+		host = 'localhost'
+		port = 3000
+		s.connect((host,port))
+		
+		print 'Connected to: ',s.getpeername()
 
-	s.close()
+		if param == 'quit':
+			s.sendall('q')
+		elif param == 'pause':
+			s.sendall('p')
+		elif param == 'start':
+			s.sendall('s')
+		
+
+		s.close()
+	except Exception:
+		print 'Couldnt connect to server'
+		print traceback.format_exc()
 
 if __name__ == '__main__':
 

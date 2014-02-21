@@ -61,6 +61,8 @@ guidata(hObject, handles);
 % UIWAIT makes MiceSetup wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
+config = Configuration();
+setappdata(0,'config',config);
 
 % --- Outputs from this function are returned to the command line.
 function varargout = MiceSetup_OutputFcn(hObject, eventdata, handles) 
@@ -93,5 +95,5 @@ function prev_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to prev_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    Trigger;
+    MainApp;
     close MiceSetup;

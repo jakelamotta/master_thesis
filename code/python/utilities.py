@@ -43,19 +43,25 @@ class FileHandler:
 		output = exception_message+' '+time.asctime(time.localtime())+'\n'
 		FileHandler.saveToFile(output,'log.txt','a')
 
-def padNumber(number):
-	newNr = str(number)
-	while len(newNr) != 5:
-		newNr = '0'+newNr	
-	return newNr
+#General utility class with functions for manipulating data
+class Utilities:
 
-def toSigned(n):
-	return n - ((0x80 & n) << 1)
+	@staticmethod
+	def padNumber(number,length):
+		newNr = str(number)
+		while len(newNr) != length:
+			newNr = '0'+newNr	
+		return newNr
+	
+	@staticmethod
+	def toSigned(n):
+		return n - ((0x80 & n) << 1)
+	
+	@staticmethod
+	def convert2DCoordsTo3DCoords(dx1,dx2,dy1,dy2):
 
-def 2DCoordsTo3DCoords(dx1,dx2,dy1,dy2):
+		newdx = 0
+		newdy = 0
+		newAngle = 0
 
-	newdx = 0
-	newdy = 0
-	newAngle = 0
-
-	return newdx,newdy,newAngle
+		return newdx,newdy,newAngle

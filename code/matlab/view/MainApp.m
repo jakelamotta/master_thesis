@@ -79,7 +79,7 @@ function start_btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     clear all;
-    Trigger;
+    MiceSetup;
     close MainApp;
 
 % --- Executes on button press in load_btn.
@@ -93,16 +93,18 @@ function load_btn_Callback(hObject, eventdata, handles)
     %displayed
     try
         load('config.mat');
-        configFileFound = true;
-    catch IOException
-        errordlg('Couldnt load the configuration file, it migth be missing or broken. Try running the configuration process again.');
+        configFileFound = validateConfigObject(config);
+    catch e
         configFileFound = false;
     end
     
-    %If a config file was found 
+    %If a config file was found exit and start main window
     if configFileFound
+        setappdata(0,'config',config);
         MainWindow;
         close MainApp;
+    else
+        errordlg('Couldnt load the configuration file, its either missing or broken. Try running the configuration process again.');
     end
 
 
@@ -112,7 +114,10 @@ function notnow_btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-q = questdlg('Without selecting a configuration option you will not be able to run an experiment. Do you still want to continue?');
+    q = questdlg('Without selecting a configuration option you will not be able to run an experiment. Do you still want to continue?');
+    config = Configuration();
+    config.setRunnable(false);
+    setappdata(0,'config',config)
     
     if strcmp('Yes',q)
         MainWindow;

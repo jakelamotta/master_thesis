@@ -12,7 +12,8 @@ function [ result ] = calcdata(output)
         time = [1];
 
         try        
-            block = blocks(i);
+            curr = blocks(i);
+            block = curr{1};
             for i=1:(length(block)/7)-1
                 if i == 1
                     str_ = strcat(block(2),block(3),block(4),block(5),block(6));
@@ -23,7 +24,6 @@ function [ result ] = calcdata(output)
                 str_ = strcat(block(a),block(a+1),block(a+2),block(a+3),block(a+4));
                 temp(end+1) = str2num(str_);
                 a = a+7;
-
             end
         catch Exception
             %output
@@ -33,7 +33,7 @@ function [ result ] = calcdata(output)
         result{1,i} = temp;
     end
     
-    result    
+        
 %         try        
 % 
 %             for i=1:(length(output_time)/8)-1

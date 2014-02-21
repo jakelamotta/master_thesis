@@ -4,13 +4,17 @@ import socket
 import utilities
 import traceback
 import time
-#import mouse
 
+#Global variables
 coords = [0,0,0,0]
 mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
+defaultPort = 3000 #Default port value for the trigger server to be listening on
 
+#Handles the mice sensors, inherits from Thread as it continously polls the coord variable
+#which in return is manipulated by the mice.
 class MouseHandler(threading.Thread):
 	
+	#Default constructor, set up the mouse sensors
 	def __init__(self):
 		self.sensors = []
 		self.triggerMouse = None
@@ -23,7 +27,7 @@ class MouseHandler(threading.Thread):
 		
 		super(MouseHandler,self).__init__()
 		
-
+	#Overriden run-method
 	def run(self):
 		global coords
 		
@@ -36,30 +40,39 @@ class MouseHandler(threading.Thread):
 		except Exception:
 			utilities.FileHandler.logException(traceback.format_exc())
 		
-		timestamp = []
-		while self.run_:
+		start = time.time()
+		while self.run_:					
 			sum_ = 0	
+			
 			if sum(coords) < 0:
 				sum_ = -sum(coords)
 			else:
 				sum_ = sum(coords)
 			
 			if sum_ > 0 and not self.pause:
-				#.append(t)
-				timestamp.append(time.time())
-				print utilities.padNumber(coords[0]),padNumber(coords[1]),padNumber(coords[2]),padNumber(coords[3])
+				flag = True
 			
+				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(int(round((time.time()-start)*1000)),6),'temptime.txt','append')
+				
+				#print utilities.Utilities.padNumber(coords[0]),utilities.Utilities.padNumber(coords[1]),utilities.Utilities.padNumber(coords[2]),utilities.Utilities.padNumber(coords[3])
+				
+				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[0],5),'tempdata.txt','append')
+				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[1],5),'tempdata.txt','append')			
+				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[2],5),'tempdata.txt','append')		
+				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[3],5),'tempdata.txt','append')
+
+			if self.pause and flag:
+				utilities.FileHandler.saveToFile('*','tempdata.txt','append')
+				utilities.FileHandler.saveToFile('*','temptime.txt','append')
+				flag = False
+
 			coords = [0,0,0,0]		
 		
-		try:
-			utilities.FileHandler.saveToFile(timestamp,'timestamp.txt')		
-		except IOError:
-			utilities.FileHandler.logException("Couldnt save timestamp to file")		
-	
 	def addMouse(self,mouse):
 		self.sensors.append(mouse)
 
-	
+
+#Super class to teh different mouse classes. 
 class AbstractMouse(threading.Thread):
 
 	def __init__(self,nr,handler):
@@ -77,6 +90,7 @@ class AbstractMouse(threading.Thread):
 
 		super(AbstractMouse,self).__init__()
 
+#Id-mouse used to id itself
 class IdMouse(AbstractMouse):
 
 	def __init__(self,nr):
@@ -84,13 +98,13 @@ class IdMouse(AbstractMouse):
 		self.run_ = True
 		super(IdMouse,self).__init__(nr,None)
 
-	
+	#Simple method to identfiy which mouse is which
 	def run(self):
 		while self.run_:
 			status, dx, dy = tuple(ord(c) for c in self.mouse.read(3))	
 			self.id = self.number				
 			
-	
+#Sensor mouse, provides functions for reading mouse delta coordinates	
 class SensorMouse(AbstractMouse):
 
 	def __init__(self,identifier,nr,h):
@@ -103,8 +117,8 @@ class SensorMouse(AbstractMouse):
 		global coords
 		while self.handler.run_:
 			status, dx, dy = tuple(ord(c) for c in self.mouse.read(3))
-			dx = utilities.toSigned(dx)
-			dy = utilities.toSigned(dy)
+			dx = utilities.Utilities.toSigned(dx)
+			dy = utilities.Utilities.toSigned(dy)
 					
 			if self.id == 'sensor1':			
 				coords[0] = dx
@@ -113,21 +127,18 @@ class SensorMouse(AbstractMouse):
 				coords[2] = dx
 				coords[3] = dy
 
-def parseArguments(args):
-	pass		
 
-
-def openTriggerSocket(port):
-	#print 'listening on port: ',port
+#Listens on socket for signal from trigger client. Can start, pause and stop readings
+def openTriggerSocket(port,host):
+	
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.bind(('130.238.33.175',port))
+		s.bind((host,port))
 		s.listen(1)
 		s.settimeout(120)	
 
 		connection, addr = s.accept()     # Establish connection with client.
-		#connection.send("T")		     	
-		#print s.gethostname()
+		
 		if connection.recv(1) == 's':
 			handler = MouseHandler()
 			handler.start()
@@ -141,14 +152,14 @@ def openTriggerSocket(port):
 			
 			if trigger == 'p':
 				handler.pause = True
-				connection.close()
 				
-				connection,addr = s.accept()
-				handler.pause = False
-			else:
-				handler.run_ = False	
-			
-			
+				if connection.recv(1) == 's':
+					handler.pause = False			
+				else:
+					handler.run_ = False
+
+			elif trigger == 'q':
+				handler.run_ = False			
 			
 	except Exception:
 		utilities.FileHandler.logException(traceback.format_exc())	
@@ -160,26 +171,33 @@ def openTriggerSocket(port):
 		except UnboundLocalError:
 			pass
 
-#Run DAQ with timer set in ms
-def runWithTimer(time):
-
-	start = time.time()
-
+#Run DAQ with timer
+#Paramter time should be in ms
+def runWithTimer(time_):
 	handler = MouseHandler()
 	handler.start()
-	current = time.time()-start
 	
-	while time < current:
-		current = time.time()-start
+	time.sleep(time_/1000)
 
 	handler.run_ = False	
+
+#Function for parsing system args. 
+def parseArgs(args):
+	output = {}
+	output['function'] = args[1]	
+
+	for index in range(2,len(args),2):
+		output[args[index]] = args[index+1]
 		
-	
+	return output
 
 	
+#Code that is run when calling the files
 if __name__ == '__main__':
+	args = parseArgs(sys.argv) #sys.argv are arguments provided when calling function from commandline
 	
-	#args = parseArgs(sys.argvs)	
-		
-	openTriggerSocket(4444)
-
+	#"swich-case" for determining which function to run
+	if args['function'] == 'network':
+		openTriggerSocket(int(args['port']),args['host'])
+	elif args['function'] == 'timer':
+		runWithTimer(int(args['time']))

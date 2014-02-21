@@ -63,14 +63,23 @@ guidata(hObject, handles);
 
 config = getappdata(0,'config');
 
-if true%config.network_trigger
-    set(handles.network_rdbtn,'value',1);
-elseif config.timer_trigger
-     set(handles.timer_rdbtn,'value',1);
-%NOT YET IMPLEMENTED
-% elseif config.no_trigger
-%     set(handles.no_trigger_rdbtn,'value',1);
-end
+% 
+% try
+%     if strcmp(config.trigger,'network')
+%         set(handles.network_rdbtn,'value',1);
+%         set(handles.network_menu_item,'Checked','On');
+% 
+%     elseif strcmp(config.trigger,'timer')
+%         set(handles.timer_rdbtn,'value',1);
+%         set(handles.timer_menu_item,'Checked','On');
+%     else
+%         set(handles.no_rdbtn,'value',1);
+%     end
+% catch e
+%     set(handles.run_btn,'enable','off');
+%     set(handles.no_rdbtn,'value',0);
+% end
+set(handles.no_rdbtn,'value',1);
 
 
 % --- Outputs from this function are returned to the command line.
@@ -89,84 +98,93 @@ function Untitled_1_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
+    
 % --------------------------------------------------------------------
 function Untitled_2_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_2 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
+    
 % --------------------------------------------------------------------
 function Untitled_3_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-% --- If Enable == 'on', executes on mouse press in 5 pixel border.
-% --- Otherwise, executes on mouse press in 5 pixel border or over radiobutton2.
-function radiobutton2_ButtonDownFcn(hObject, eventdata, handles)
-% hObject    handle to radiobutton2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
+    
 % --- Executes on button press in run_btn.
 function run_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to run_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    config = getappdata(0,'config');
+    config = getappdata(0,'config')
     
-%     if get(handles.network_rdbtn,'value') == 1
-%         TriggerServer(config.port);
-%     elseif get(handles.timer_rdbtn,'value') == 1
-%         
-%     end
-    
-    %m = msgbox('System is running, please wait for recording to finish');
-    set(handles.run_btn,'String','Running..');
-    drawnow;
-    msgbox('Data aquisiton has started, please wait for ');
-    [~,output] = system('echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py');
-    set(handles.run_btn,'String','Run');
-    drawnow;
-    result = [0];
-    time = [1];
-    
-    try
+    if config.runnable
         
-        for i=1:(length(output)/6)-1
-            if i == 1
-
-                result(1) = str2num(output(1:5));
-                a = 6;
-            end
-
-            time(end+1) = i+1;
-            result(end+1) = str2num(output(a:a+5));
-            a = a+6;
+        if exist('/home/kristian/master_thesis/code/python/tempdata.txt','file')
+            delete('/home/kristian/master_thesis/code/python/tempdata.txt');
         end
-    catch Exception
-        errordlg('Something went wrong with the data, please try again', 'Corrupt data');        
+        if exist('/home/kristian/master_thesis/code/python/temptime.txt','file')
+            delete('/home/kristian/master_thesis/code/python/temptime.txt');
+        end
+        
+        set(handles.run_btn,'String','Running..');
+        drawnow;    
+        arg = '';
+        if get(handles.network_rdbtn,'value')
+            port =  num2str(config.port);
+            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port"',' ',port,' host ',getIPAddress];
+            system(arg)
+            
+        elseif get(handles.timer_rdbtn,'value')
+            time = num2str(get(handles.timer_edt,'String'))
+            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "timer" "time"',' ',time];
+            system(arg)
+            
+        elseif get(handles.no_rdbtn,'value')
+            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port" "3000" "host" "localhost" &'];
+            system(arg);
+            pause(.2);
+            h = msgbox('Data aquisition has started, press ok (Enter) to stop it');
+            system('python /home/kristian/master_thesis/code/python/TriggerClient.py "start"');
+            waitfor(h);
+            system('python /home/kristian/master_thesis/code/python/TriggerClient.py "quit"');
+        end
+        
+        try
+            fid = fopen('/home/kristian/master_thesis/code/python/tempdata.txt','r');
+            output = fread(fid,'uint8=>char');
+            
+            fid = fopen('/home/kristian/master_thesis/code/python/temptime.txt','r');
+            output_time = fread(fid,'uint8=>char');            
+        catch e
+            errordlg('Data file couldnt be found');
+        end
+
+        set(handles.run_btn,'String','Run');
+        drawnow;
+       
+        result = calcdata(output);
+
+        set(handles.axes1,'UserData',time);
+        plot(handles.axes1,result);
+        
+    else
+        q = questdlg('Configuration isnt done so no experiments can be run. Would you like to configure the system now?');
+        
+        if strcmp(q,'Yes')
+            MiceSetup;
+            close MainWindow;
+        end
     end
-    
-    %Save data to file with default filename as timestamp on minute
-    %precision
-    c = clock;
-    filename = strcat(int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'.mat');
-    %save(filename,'result');    
-    
-    set(handles.axes1,'UserData',time);
-    plot(handles.axes1,result);
-    
+        
+        
 % --- Executes on button press in stop_btn.
 function stop_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to stop_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    msgbox('Not yet implemented');
+    
 
 
 % --- Executes on key press with focus on stop_btn and none of its controls.
@@ -177,7 +195,7 @@ function stop_btn_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-
+    msgbox('Not yet implemented');
 
 % --------------------------------------------------------------------
 function manual_menu_item_Callback(hObject, eventdata, handles)
@@ -206,18 +224,18 @@ function confgiure_menu_item_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     
-    if exist('config.mat') == 2
+    if exist('config.mat','file') == 2
         button = questdlg('Are you sure you want to configure the system? Finishing it will overwrite the current one.');
         
-        if button == 'Yes'
+        if strcmp(button,'Yes')
             clear all;
-            Trigger;
+            MiceSetup;
             close MainWindow;
         end
         
     else
         clear all;
-        Trigger;
+        MiceSetup;
         close MainWindow;
     end
 
@@ -226,14 +244,14 @@ function reset_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to reset_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+    msgbox('Not yet implemented');
 
 % --------------------------------------------------------------------
 function save_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to save_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)   
-    
+    msgbox('Not yet implemented');
 
 
 % --------------------------------------------------------------------
@@ -241,9 +259,11 @@ function exit_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to exit_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    close all;
-
-
+    q = questdlg('Are you sure you want to exit?');
+    
+    if strcmp(q,'Yes')
+        close all;
+    end
 % --------------------------------------------------------------------
 function no_trigger_menu_Callback(hObject, eventdata, handles)
 % hObject    handle to no_trigger_menu (see GCBO)
@@ -263,15 +283,6 @@ function timer_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to timer_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in apply_btn.
-function apply_btn_Callback(hObject, eventdata, handles)
-% hObject    handle to apply_btn (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
 
 function timer_edt_Callback(hObject, eventdata, handles)
 % hObject    handle to timer_edt (see GCBO)

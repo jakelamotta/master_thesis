@@ -85,8 +85,11 @@ function next_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to next_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    save('config.mat');
-    MainWindow();
+    config = getappdata(0,'config');
+    
+    save('config.mat','config');
+    
+    MainWindow;
     close MouseID;
 
 % --- Executes on button press in prev_btn.
@@ -115,14 +118,18 @@ function id_btn_Callback(hObject, eventdata, handles)
     %Functionality to strip the resulting output from any non-digit characters
     index = isstrprop(output,'digit');
     output(~index) = '';
-    output = output(find(index,1):end)
-    
-    %If the ouput is of the proper form a succes-message will be shown
-    if (str2num(output(1)) > -1)
-        title = 'Success! Mouse identified.';
-        message = strcat('Mouse ',output(1),' is used as an actual mouse');
-        msgbox(message,title);  
+    output = output(find(index,1):end);
+    try
+        %If the ouput is of the proper form a succes-message will be shown
+        if (str2num(output(1)) > -1)
+            title = 'Success! Mouse identified.';
+            message = strcat('Mouse ',output(1),' is used as an actual mouse');
+            msgbox(message,title);  
+        end
+    catch e
+        errordlg('Something went wrong, please try again!');
     end
+        
     
     set(handles.hidden_txt,'visible','off');
     drawnow;

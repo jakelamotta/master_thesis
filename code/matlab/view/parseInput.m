@@ -2,9 +2,10 @@ function [ array_of_blocks ] = parseInput(filedata)
 %parseInput is a function for separating blocks of raw data from each other
 %return an array of strings, each containing data for one block
 
-
+    filedata = transpose(filedata);
     numBlocks = strfind(filedata,'*');
-    if ~isEmpty(numBlocks)
+    
+    if length(numBlocks) ~= 0
         array_of_blocks = {1,length(numBlocks)};
 
         array_of_blocks{1,1} = filedata(1:numBlocks(1));

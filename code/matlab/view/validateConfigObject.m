@@ -7,9 +7,8 @@ function [ valid ] = validateConfigObject(config)
 
     valid = true;
     try
-        fprintf('values: ');
-        valid = config.runnable
-        valid = (config.port >0)
+        valid = config.runnable;
+        valid = (config.port >0);
     catch e
         valid = false;
     end
