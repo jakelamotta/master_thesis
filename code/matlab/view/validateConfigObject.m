@@ -7,8 +7,7 @@ function [ valid ] = validateConfigObject(config)
 
     valid = true;
     try
-        valid = config.runnable;
-        valid = (config.port >0);
+        valid = config.runnable && (config.port >0) && exist(config.savepath,'dir');
     catch e
         valid = false;
     end

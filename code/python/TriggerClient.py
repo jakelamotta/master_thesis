@@ -7,7 +7,7 @@ def sendTrigger(param):
 
 		s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)	
 		host = 'localhost'
-		port = 3000
+		port = 4444
 		s.connect((host,port))
 		
 		print 'Connected to: ',s.getpeername()

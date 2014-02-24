@@ -131,36 +131,40 @@ class SensorMouse(AbstractMouse):
 #Listens on socket for signal from trigger client. Can start, pause and stop readings
 def openTriggerSocket(port,host):
 	
+
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.bind((host,port))
 		s.listen(1)
 		s.settimeout(120)	
-
-		connection, addr = s.accept()     # Establish connection with client.
 		
-		if connection.recv(1) == 's':
+		print 'connection is running on ',host
+		connection, addr = s.accept()     # Establish connection with client.
+		print 'Connection accepted from ',addr
+		msg = connection.recv(1)
+		if msg == 's':
+			print 's'
 			handler = MouseHandler()
 			handler.start()
-			
+		else:
+			print 'Not correct msg ',msg
+
 		while handler.run_:
 			
 			connection.close()
 			connection, addr = s.accept()     # Establish connection with client.
 			
 			trigger = connection.recv(1)
-			
+			print 'Message rec: ',trigger
 			if trigger == 'p':
 				handler.pause = True
 				
-				if connection.recv(1) == 's':
-					handler.pause = False			
-				else:
-					handler.run_ = False
-
 			elif trigger == 'q':
 				handler.run_ = False			
 			
+			elif trigger == 's':
+				handler.pause = False
+
 	except Exception:
 		utilities.FileHandler.logException(traceback.format_exc())	
 	finally: 

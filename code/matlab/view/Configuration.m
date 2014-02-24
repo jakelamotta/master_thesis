@@ -9,6 +9,8 @@ classdef Configuration < handle
         port;
         timer;
         runnable;
+        time;
+        savepath;
     end
     
     methods (Access = 'public')
@@ -16,8 +18,10 @@ classdef Configuration < handle
         %Constructor for the config object
         function this = Configuration()
             this.port = 4444;
-            this.trigger = 'no_trigger';
+            this.trigger = 'timer';
             this.runnable = true;
+            time = 3000;
+            this.savepath = '/home/kristian/master_thesis/data';
         end     
         
         %%%%%%%%%%SETTERS%%%%%%%%%%%%%%%%

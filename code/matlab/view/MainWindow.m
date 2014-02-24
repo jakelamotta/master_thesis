@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 13-Feb-2014 15:57:44
+% Last Modified by GUIDE v2.5 24-Feb-2014 15:27:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -125,7 +125,11 @@ function run_btn_Callback(hObject, eventdata, handles)
         end
         if exist('/home/kristian/master_thesis/code/python/temptime.txt','file')
             delete('/home/kristian/master_thesis/code/python/temptime.txt');
-        end
+        end        
+        
+        %Save data to file with current date and time as filename
+        c = clock;
+        filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
         
         set(handles.run_btn,'String','Running..');
         drawnow;    
@@ -133,15 +137,15 @@ function run_btn_Callback(hObject, eventdata, handles)
         if get(handles.network_rdbtn,'value')
             port =  num2str(config.port);
             arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port"',' ',port,' host ',getIPAddress];
-            system(arg)
+            system(arg);
             
         elseif get(handles.timer_rdbtn,'value')
-            time = num2str(get(handles.timer_edt,'String'))
+            time = num2str(get(handles.timer_edt,'String'));
             arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "timer" "time"',' ',time];
             system(arg)
             
         elseif get(handles.no_rdbtn,'value')
-            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port" "3000" "host" "localhost" &'];
+            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port" "4444" "host" "localhost" &'];
             system(arg);
             pause(.2);
             h = msgbox('Data aquisition has started, press ok (Enter) to stop it');
@@ -163,10 +167,17 @@ function run_btn_Callback(hObject, eventdata, handles)
         set(handles.run_btn,'String','Run');
         drawnow;
        
-        result = calcdata(output);
-
-        set(handles.axes1,'UserData',time);
-        plot(handles.axes1,result);
+        [data,fulldata] = calcdata(output,output_time);
+        
+        save(filename,'data');
+        
+        %FIX THIS!!!!!!!
+        set(handles.axes2,'visible','on');
+        set(handles.axes3,'visible','on');
+        
+        plot(handles.axes1,data{4,2},data{2,2});
+        plot(handles.axes2,data{4,1},data{2,1});
+        plot(handles.axes3,fulldata{4,1},fulldata{2,1});
         
     else
         q = questdlg('Configuration isnt done so no experiments can be run. Would you like to configure the system now?');
@@ -325,3 +336,13 @@ function Untitled_11_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_11 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes during object deletion, before destroying properties.
+function figure1_DeleteFcn(hObject, eventdata, handles)
+% hObject    handle to figure1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    config = getappdata(0,'config');
+    
+    save('config.mat', 'config');
