@@ -62,8 +62,10 @@ function [ data,concatdata ] = calcdata(output,output_time)
         
         time(end+1) = 0;
         data{4,k} = time;
-        concatdata = concatBlocks(data);
+        
     end
+    
+    concatdata = concatBlocks(data);
     
     
     
@@ -98,16 +100,24 @@ function [fullsequence] = concatBlocks(data)
 
    len = size(data);
    
-   if len > 1
+   
+   
+   if len(2) > 1
        fullsequence = cell(4,1);
    
        fullsequence{1,1} = [data{1,1}];
-       fullsequence{1,2} = [data{2,1}];
-       fullsequence{1,3} = [data{3,1}];
-       fullsequence{1,4} = [data{4,1}];
+       fullsequence{2,1} = [data{2,1}];
+       fullsequence{3,1} = [data{3,1}];
+       fullsequence{4,1} = [data{4,1}];
 
 
-       for i=2:len(2)
+       if length(data{1,end}) == 0
+           final = len(2)-1;
+       else
+           final = len(2);
+       end
+           
+       for i=2:final
            fullsequence{1,1} = [fullsequence{1,1},data{1,i}];
            fullsequence{2,1} = [fullsequence{2,1},data{2,i}];
            fullsequence{3,1} = [fullsequence{3,1},data{3,i}];
@@ -169,12 +179,12 @@ end
 function [array] = fillArray(data,numBlocks)
     
     if length(numBlocks) ~= 0
-        array = {1,length(numBlocks)+1};
+        array = cell(1,length(numBlocks)+1);
 
         array{1,1} = data(1:numBlocks(1)-2);
 
         for i=2:(length(numBlocks))
-            array{1:i} = data(numBlocks(i-1)+2:numBlocks(i)-2);
+            array{1,i} = data(numBlocks(i-1)+2:numBlocks(i)-2);
         end
         
         array{1,end} = data(numBlocks(end)+2:end);

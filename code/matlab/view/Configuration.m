@@ -32,6 +32,10 @@ classdef Configuration < handle
         function runnable = setRunnable(this,bool)
             this.runnable = bool;
         end
+        
+        function savepath = setPath(this,path)
+            this.savepath = path;
+        end
     end
     
 end

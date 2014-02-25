@@ -134,16 +134,22 @@ function run_btn_Callback(hObject, eventdata, handles)
         set(handles.run_btn,'String','Running..');
         drawnow;    
         arg = '';
+        
         if get(handles.network_rdbtn,'value')
             port =  num2str(config.port);
             arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port"',' ',port,' host ',getIPAddress];
             system(arg);
             
         elseif get(handles.timer_rdbtn,'value')
-            time = num2str(get(handles.timer_edt,'String'));
-            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "timer" "time"',' ',time];
-            system(arg)
-            
+            input = get(handles.timer_edt,'String');
+            if isstrprop(input,'digit')
+                
+                time = num2str(input);
+                arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "timer" "time"',' ',time];
+                system(arg)
+            else
+                errordlg('Timer input muse be an integer, please try again');
+            end
         elseif get(handles.no_rdbtn,'value')
             arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port" "4444" "host" "localhost" &'];
             system(arg);
@@ -171,13 +177,9 @@ function run_btn_Callback(hObject, eventdata, handles)
         
         save(filename,'data');
         
-        %FIX THIS!!!!!!!
-        set(handles.axes2,'visible','on');
-        set(handles.axes3,'visible','on');
-        
-        plot(handles.axes1,data{4,2},data{2,2});
-        plot(handles.axes2,data{4,1},data{2,1});
-        plot(handles.axes3,fulldata{4,1},fulldata{2,1});
+        plot(handles.axes1,fulldata{4,1},fulldata{1,1});
+        plot(handles.axes2,fulldata{4,1},fulldata{2,1});
+        plot(handles.axes3,fulldata{4,1},fulldata{3,1});
         
     else
         q = questdlg('Configuration isnt done so no experiments can be run. Would you like to configure the system now?');
@@ -262,7 +264,9 @@ function save_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to save_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)   
-    msgbox('Not yet implemented');
+    config = getappdata(0,'config');
+    config.setPath(uigetdir());
+    setappdata(0,'config',config);
 
 
 % --------------------------------------------------------------------
