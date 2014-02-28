@@ -40,6 +40,15 @@ classdef Configuration < handle
         function time = setTime(this,t)
             this.time = t;
         end
+        
+        function port = setPort(this,p)
+            %Validates portnumber before setting it
+            if str2num(p) > 1024 && str2num(p) < 65535    
+                this.port = p;
+            else
+                this.port = 4444;
+            end
+        end
     end
     
 end

@@ -79,6 +79,13 @@ function cancel_btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+    q = questdlg('Are you sure you want to exit the configuration process? All changes will be lost');
+    
+    if strcmp(q,'Yes')
+        MainApp;
+        close MouseID;
+        
+    end
 
 % --- Executes on button press in next_btn.
 function next_btn_Callback(hObject, eventdata, handles)
@@ -87,7 +94,7 @@ function next_btn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     config = getappdata(0,'config');
     
-    save('config.mat','config');
+    save('/home/kristian/master_thesis/code/matlab/view/config.mat','config');
     
     MainWindow;
     close MouseID;

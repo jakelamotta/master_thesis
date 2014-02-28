@@ -92,7 +92,7 @@ function load_btn_Callback(hObject, eventdata, handles)
     %Try loading the config-file, if not successfull an error message is
     %displayed
     try
-        load('config.mat');
+        load('/home/kristian/master_thesis/code/matlab/view/config.mat');
         configFileFound = validateConfigObject(config);
     catch e
         configFileFound = false;

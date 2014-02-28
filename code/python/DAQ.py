@@ -4,6 +4,7 @@ import socket
 import utilities
 import traceback
 import time
+import os
 
 #Global variables
 coords = [0,0,0,0]
@@ -11,7 +12,7 @@ mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
 defaultPort = 3000 #Default port value for the trigger server to be listening on
 
 #Handles the mice sensors, inherits from Thread as it continously polls the coord variable
-#which in return is manipulated by the mice.
+#which in return is written to by the mice.
 class MouseHandler(threading.Thread):
 	
 	#Default constructor, set up the mouse sensors
@@ -53,8 +54,6 @@ class MouseHandler(threading.Thread):
 				flag = True
 			
 				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(int(round((time.time()-start)*1000)),6),'temptime.txt','append')
-				
-				#print utilities.Utilities.padNumber(coords[0]),utilities.Utilities.padNumber(coords[1]),utilities.Utilities.padNumber(coords[2]),utilities.Utilities.padNumber(coords[3])
 				
 				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[0],5),'tempdata.txt','append')
 				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[1],5),'tempdata.txt','append')			
@@ -113,8 +112,11 @@ class SensorMouse(AbstractMouse):
 		self.handler = h	
 		super(SensorMouse,self).__init__(nr,h)
 		
+	
 	def run(self):
 		global coords
+		
+		#Reads mouse delta coordinates and write them to the global coord array
 		while self.handler.run_:
 			status, dx, dy = tuple(ord(c) for c in self.mouse.read(3))
 			dx = utilities.Utilities.toSigned(dx)
@@ -131,7 +133,6 @@ class SensorMouse(AbstractMouse):
 #Listens on socket for signal from trigger client. Can start, pause and stop readings
 def openTriggerSocket(port,host):
 	
-
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.bind((host,port))
@@ -141,7 +142,9 @@ def openTriggerSocket(port,host):
 		print 'connection is running on ',host
 		connection, addr = s.accept()     # Establish connection with client.
 		print 'Connection accepted from ',addr
+	
 		msg = connection.recv(1)
+		
 		if msg == 's':
 			print 's'
 			handler = MouseHandler()
@@ -149,6 +152,8 @@ def openTriggerSocket(port,host):
 		else:
 			print 'Not correct msg ',msg
 
+		
+		#Runs until client process sends 'quit'-command		
 		while handler.run_:
 			
 			connection.close()
@@ -166,6 +171,7 @@ def openTriggerSocket(port,host):
 				handler.pause = False
 
 	except Exception:
+		print traceback.format_exc()
 		utilities.FileHandler.logException(traceback.format_exc())	
 	finally: 
 		s.shutdown(socket.SHUT_RDWR)
@@ -185,6 +191,20 @@ def runWithTimer(time_):
 
 	handler.run_ = False	
 
+#Run DAQ without trigger, uses named pipe to communicate with matlab
+def runWithoutTrigger():
+
+	pipe = '/home/kristian/master_thesis/pipe'
+
+	handler = MouseHandler()
+	handler.start()
+	
+	#Reads from pipe as soon as anything is written it stops
+	open(pipe).read().strip()
+
+	handler.run_ = False
+	
+
 #Function for parsing system args. 
 def parseArgs(args):
 	output = {}
@@ -199,9 +219,13 @@ def parseArgs(args):
 #Code that is run when calling the files
 if __name__ == '__main__':
 	args = parseArgs(sys.argv) #sys.argv are arguments provided when calling function from commandline
+
+	##Solve this with function map instead, neater
 	
 	#"swich-case" for determining which function to run
 	if args['function'] == 'network':
 		openTriggerSocket(int(args['port']),args['host'])
 	elif args['function'] == 'timer':
 		runWithTimer(int(args['time']))
+	elif args['function'] == 'notrigger':
+		runWithoutTrigger()

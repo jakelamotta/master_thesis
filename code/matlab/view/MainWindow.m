@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 24-Feb-2014 15:27:00
+% Last Modified by GUIDE v2.5 27-Feb-2014 11:35:33
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -63,23 +63,18 @@ guidata(hObject, handles);
 
 config = getappdata(0,'config');
 
-% 
-% try
-%     if strcmp(config.trigger,'network')
-%         set(handles.network_rdbtn,'value',1);
-%         set(handles.network_menu_item,'Checked','On');
-% 
-%     elseif strcmp(config.trigger,'timer')
-%         set(handles.timer_rdbtn,'value',1);
-%         set(handles.timer_menu_item,'Checked','On');
-%     else
-%         set(handles.no_rdbtn,'value',1);
-%     end
-% catch e
-%     set(handles.run_btn,'enable','off');
-%     set(handles.no_rdbtn,'value',0);
-% end
-set(handles.no_rdbtn,'value',1);
+set(handles.timer_edt,'String',config.time);
+
+if strcmp(config.trigger,'network')
+    set(handles.network_rdbtn,'value',1);
+    %set(handles.network_menu_item,'Checked','On');
+
+elseif strcmp(config.trigger,'timer')
+    set(handles.timer_rdbtn,'value',1);
+    %set(handles.timer_menu_item,'Checked','On');
+else
+    set(handles.no_rdbtn,'value',1);
+end
 
 
 % --- Outputs from this function are returned to the command line.
@@ -134,10 +129,10 @@ function run_btn_Callback(hObject, eventdata, handles)
         set(handles.run_btn,'String','Running..');
         drawnow;    
         arg = '';
-        
+        port =  num2str(config.port);
         if get(handles.network_rdbtn,'value')
-            port =  num2str(config.port);
-            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port"',' ',port,' host ',getIPAddress];
+            
+            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port"',' ',port,' host stimuli-hp'];%,getIPAddress];
             system(arg);
             
         elseif get(handles.timer_rdbtn,'value')
@@ -148,16 +143,27 @@ function run_btn_Callback(hObject, eventdata, handles)
                 arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "timer" "time"',' ',time];
                 system(arg)
             else
-                errordlg('Timer input muse be an integer, please try again');
+                errordlg('Timer input must be an integer, please try again');
             end
         elseif get(handles.no_rdbtn,'value')
-            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port" "4444" "host" "localhost" &'];
+            
+            arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "notrigger" &'];
             system(arg);
+            
             pause(.2);
+            
+            if ~exist('/home/kristian/master_thesis/pipe','file')
+                system('mkfifo "/home/kristian/master_thesis/pipe"'); %Create named pipe if not existing
+            end
+            
             h = msgbox('Data aquisition has started, press ok (Enter) to stop it');
-            system('python /home/kristian/master_thesis/code/python/TriggerClient.py "start"');
+                        
             waitfor(h);
-            system('python /home/kristian/master_thesis/code/python/TriggerClient.py "quit"');
+            
+            %Code for communicating with python process
+            fid = fopen('/home/kristian/master_thesis/pipe','w');
+            fwrite(fid,'quit');      %Write correct command to the pipe
+            fclose(fid);             %Close pipe
         end
         
         try
@@ -257,15 +263,26 @@ function reset_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to reset_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    msgbox('Not yet implemented');
+    %Clear all graphs from data
+    cla(handles.axes1);
+    cla(handles.axes2);
+    cla(handles.axes3);
+    cla(handles.axes4);
 
 % --------------------------------------------------------------------
 function save_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to save_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)   
+    
+    %Code that allows the user to set save path
     config = getappdata(0,'config');
-    config.setPath(uigetdir());
+    dir = uigetdir();
+    
+    if dir
+        config.setPath(dir);
+    end
+    
     setappdata(0,'config',config);
 
 
@@ -347,6 +364,28 @@ function figure1_DeleteFcn(hObject, eventdata, handles)
 % hObject    handle to figure1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    %Saves GUI settings at shutdown
+
     config = getappdata(0,'config');
     
-    save('config.mat', 'config');
+    config.setTime(get(handles.timer_edt,'String'));
+    
+    
+    if get(handles.network_rdbtn, 'value') == 1
+        config.setNetworkTrigger('network');
+    elseif get(handles.timer_rdbtn, 'value') == 1
+        config.setNetworkTrigger('timer');
+    else
+        config.setNetworkTrigger('no');
+    end   
+    
+    save('/home/kristian/master_thesis/code/matlab/view/config.mat', 'config');
+
+
+% --------------------------------------------------------------------
+function addr_item_Callback(hObject, eventdata, handles)
+% hObject    handle to addr_item (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    host;
+    
