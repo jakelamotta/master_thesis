@@ -28,6 +28,9 @@ class MouseHandler(threading.Thread):
 		
 		super(MouseHandler,self).__init__()
 		
+	def stop(self):
+		self.run_ = False;
+
 	#Overriden run-method
 	def run(self):
 		global coords
@@ -131,8 +134,9 @@ class SensorMouse(AbstractMouse):
 
 
 #Listens on socket for signal from trigger client. Can start, pause and stop readings
-def openTriggerSocket(port,host):
-	
+def runWithNetworkTrigger(args):
+	port = int(args['port'])
+	host = args['host']
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.bind((host,port))
@@ -165,7 +169,7 @@ def openTriggerSocket(port,host):
 				handler.pause = True
 				
 			elif trigger == 'q':
-				handler.run_ = False			
+				handler.stop()			
 			
 			elif trigger == 's':
 				handler.pause = False
@@ -183,26 +187,25 @@ def openTriggerSocket(port,host):
 
 #Run DAQ with timer
 #Paramter time should be in ms
-def runWithTimer(time_):
+def runWithTimer(args):
 	handler = MouseHandler()
 	handler.start()
 	
-	time.sleep(time_/1000)
+	time.sleep(int(args['time'])/1000)
 
-	handler.run_ = False	
+	handler.stop()	
 
 #Run DAQ without trigger, uses named pipe to communicate with matlab
-def runWithoutTrigger():
+def runWithoutTrigger(args):
 
 	pipe = '/home/kristian/master_thesis/pipe'
 
 	handler = MouseHandler()
 	handler.start()
-	
 	#Reads from pipe as soon as anything is written it stops
 	open(pipe).read().strip()
-
-	handler.run_ = False
+	
+	handler.stop()
 	
 
 #Function for parsing system args. 
@@ -218,14 +221,20 @@ def parseArgs(args):
 	
 #Code that is run when calling the files
 if __name__ == '__main__':
+	
+	#Function map 
+	functions = {'network':runWithNetworkTrigger, 'notrigger':runWithoutTrigger,'timer':runWithTimer}	
+
 	args = parseArgs(sys.argv) #sys.argv are arguments provided when calling function from commandline
+
+	functions[args['function']](args)	
 
 	##Solve this with function map instead, neater
 	
 	#"swich-case" for determining which function to run
-	if args['function'] == 'network':
-		openTriggerSocket(int(args['port']),args['host'])
-	elif args['function'] == 'timer':
-		runWithTimer(int(args['time']))
-	elif args['function'] == 'notrigger':
-		runWithoutTrigger()
+	#if args['function'] == 'network':
+#		openTriggerSocket(int(args['port']),args['host'])
+#	elif args['function'] == 'timer':
+#		runWithTimer(int(args['time']))
+#	elif args['function'] == 'notrigger':
+#		runWithoutTrigger()

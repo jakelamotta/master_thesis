@@ -60,37 +60,13 @@ function [ data,concatdata ] = calcdata(output,output_time)
             errordlg('Something went wrong with the timestamps, please try again', 'Corrupt data');        
         end    
         
-        time(end+1) = 0;
+         time(end+1) = 0;
         data{4,k} = time;
         
     end
     
+    %Concatenating all blocks to one for plotting purposes
     concatdata = concatBlocks(data);
-    
-    
-    
-    
-    
-%         length(result)
-%         length(time)
-        
-%         try        
-%             for i=1:(length(output)/6)-1
-%                 if i == 1
-%                     result(1) = str2num(output(1:5));
-%                     a = 6;
-%                 end
-% 
-%                 time(end+1) = i+1;
-%                 result(end+1) = str2num(output(a:a+5));
-%                 a = a+6;
-%             end
-%         catch Exception
-%             output
-%             errordlg('Something went wrong with the data, please try again', 'Corrupt data');        
-%         end     
-
-
 end
 
 %Function that concatenate all blocks in one data cell for each variable
@@ -135,7 +111,7 @@ function [forward,side,yaw] = convertData(data)
 
     %Calibration data, hardcoded for testing purposes will be changed to
     %dynamic values later
-    alpha_ = 1;
+    alpha_ = 0.38;
     omega = -45;
     r = .04;
 

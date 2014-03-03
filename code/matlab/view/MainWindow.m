@@ -67,7 +67,7 @@ set(handles.timer_edt,'String',config.time);
 
 if strcmp(config.trigger,'network')
     set(handles.network_rdbtn,'value',1);
-    %set(handles.network_menu_item,'Checked','On');
+    set(handles.network_menu_item,'Checked','On');
 
 elseif strcmp(config.trigger,'timer')
     set(handles.timer_rdbtn,'value',1);
@@ -127,14 +127,16 @@ function run_btn_Callback(hObject, eventdata, handles)
         filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
         
         set(handles.run_btn,'String','Running..');
-        drawnow;    
-        arg = '';
+        drawnow;
         port =  num2str(config.port);
+        
+        %Running with network trigger
         if get(handles.network_rdbtn,'value')
             
             arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "network" "port"',' ',port,' host stimuli-hp'];%,getIPAddress];
             system(arg);
             
+        %Running with timer
         elseif get(handles.timer_rdbtn,'value')
             input = get(handles.timer_edt,'String');
             if isstrprop(input,'digit')
@@ -145,6 +147,8 @@ function run_btn_Callback(hObject, eventdata, handles)
             else
                 errordlg('Timer input must be an integer, please try again');
             end
+            
+        %Running with no trigger
         elseif get(handles.no_rdbtn,'value')
             
             arg = ['echo "hoverfly" | sudo -S python /home/kristian/master_thesis/code/python/DAQ.py "notrigger" &'];
@@ -162,8 +166,11 @@ function run_btn_Callback(hObject, eventdata, handles)
             
             %Code for communicating with python process
             fid = fopen('/home/kristian/master_thesis/pipe','w');
-            fwrite(fid,'quit');      %Write correct command to the pipe
+            fwrite(fid,'quit');      %Write quit command to the pipe
             fclose(fid);             %Close pipe
+            
+            %Clean up, deleting the pipe
+            system('rm -f "/home/kristian/master_thesis/pipe"');
         end
         
         try
@@ -173,26 +180,25 @@ function run_btn_Callback(hObject, eventdata, handles)
             fid = fopen('/home/kristian/master_thesis/code/python/temptime.txt','r');
             output_time = fread(fid,'uint8=>char');            
         catch e
-            errordlg('Data file couldnt be found');
+            e
+            %errordlg('Data file couldnt be found');
         end
 
         set(handles.run_btn,'String','Run');
         drawnow;
        
-        [data,fulldata] = calcdata(output,output_time);
-        
-        save(filename,'data');
-        
-        plot(handles.axes1,fulldata{4,1},fulldata{1,1});
-        plot(handles.axes2,fulldata{4,1},fulldata{2,1});
-        plot(handles.axes3,fulldata{4,1},fulldata{3,1});
-        
+        if exist('output','var')
+            saveAndDisplayData(handles,output,output_time,filename);
+        else
+            msgbox('No data was recorded!','Failure');
+        end
+            
     else
         q = questdlg('Configuration isnt done so no experiments can be run. Would you like to configure the system now?');
         
         if strcmp(q,'Yes')
             MiceSetup;
-            close MainWindow;
+            close 'FlyTracker 1.0';
         end
     end
         
@@ -221,14 +227,14 @@ function manual_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to manual_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+    system('evince helpmanual.pdf');
 
 % --------------------------------------------------------------------
 function about_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to about_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+    About;
 
 % --------------------------------------------------------------------
 function Untitled_8_Callback(hObject, eventdata, handles)
@@ -249,13 +255,13 @@ function confgiure_menu_item_Callback(hObject, eventdata, handles)
         if strcmp(button,'Yes')
             clear all;
             MiceSetup;
-            close MainWindow;
+            close 'FlyTracker 1.0';
         end
         
     else
         clear all;
         MiceSetup;
-        close MainWindow;
+        close 'FlyTracker 1.0';
     end
 
 % --------------------------------------------------------------------
@@ -336,27 +342,6 @@ function timer_edt_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
-
-
-% --------------------------------------------------------------------
-function stop_menu_item_Callback(hObject, eventdata, handles)
-% hObject    handle to stop_menu_item (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function run_menu_item_Callback(hObject, eventdata, handles)
-% hObject    handle to run_menu_item (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function Untitled_11_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_11 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --- Executes during object deletion, before destroying properties.
