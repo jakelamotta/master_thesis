@@ -17,8 +17,8 @@ plot(handles.axes3,fulldata{4,1},fulldata{3,1},'.','MarkerSize',5.10);
 title(handles.axes3,'Rotational velocity (yaw)');
 
 %Delete temp data files
-delete(getpath('tempdata.txt','code'));
-delete(getpath('temptime.txt','code'));
+delete(getpath('tempdata.txt','data'));
+delete(getpath('temptime.txt','data'));
 
 end
 

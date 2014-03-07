@@ -1,6 +1,8 @@
 import json
 import time
 
+path = '/home/kristian/master_thesis/FlyTracker/data/'
+
 #Class for file input/output handling
 class FileHandler:
 	
@@ -10,12 +12,13 @@ class FileHandler:
 	@staticmethod
 	def saveToFile(toSave,fileName,*args):
 		e = 'w'
+		global path
 
 		for arg in args:
 			e = arg		
 			
 		try:
-			f = open('/home/kristian/master_thesis/FlyTracker/data/'+fileName,e)
+			f = open(path+fileName,e)
 			output = json.dumps(toSave)
 			f.write(output)
 	
@@ -27,9 +30,10 @@ class FileHandler:
 	#Output is object retrieved from the json-string 
 	@staticmethod
 	def loadFromFile(fileName,*args):
-				
+		global path
+	
 		try:
-			f = open('/home/kristian/master_thesis/FlyTracker/data/'+fileName,'r')
+			f = open(path+fileName,'r')
 			input_ = f.read()
 			obj = json.loads(input_)
 		except IOError:
@@ -43,7 +47,7 @@ class FileHandler:
 		output = exception_message+' '+time.asctime(time.localtime())+'\n'
 		FileHandler.saveToFile(output,'log.txt','a')
 
-#General utility class with functions for manipulating data
+#General utility class with functions for data handling
 class Utilities:
 
 	@staticmethod
@@ -56,12 +60,3 @@ class Utilities:
 	@staticmethod
 	def toSigned(n):
 		return n - ((0x80 & n) << 1)
-	
-	@staticmethod
-	def convert2DCoordsTo3DCoords(dx1,dx2,dy1,dy2):
-
-		newdx = 0
-		newdy = 0
-		newAngle = 0
-
-		return newdx,newdy,newAngle

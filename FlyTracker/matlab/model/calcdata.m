@@ -1,15 +1,17 @@
 function [ data,concatdata ] = calcdata(output,output_time)
 %Function that calculates the data for for the raw mouse input. output and
-%output_time has very specific restrictions on them. See developers guide
-%for this. 
+%output_time has very specific restrictions on them, see help manual for
+%this. Returns data divided into blocks and the fully concatenated data
+%cell. The latter is used for plotting and is not saved.
     
     %Divide raw input into blocks for data and time respectively
     [datablocks,timeblocks] = parseInput(output,output_time);
     
-    
+    %Initialize temporary and persistent cells
     result = cell(1,length(datablocks));
     data = cell(4,length(datablocks));
     
+    %Parsing data
     for k=1:length(datablocks)
         
         temp = [0];
@@ -28,7 +30,6 @@ function [ data,concatdata ] = calcdata(output,output_time)
                 a = a+7;
             end
         catch Exception
-            %output
             errordlg('Something went wrong with the data, please try again', 'Corrupt data');        
         end
         
@@ -36,8 +37,8 @@ function [ data,concatdata ] = calcdata(output,output_time)
         
         
         
-        %Really result{1,k} needs to be mod 4 but should always be that
-        %when bigger then 1
+        %Really result{1,k} needs to be modulo 4 but should always be that
+        %when bigger then 1. If any bugs occur here it could be that
         if length(result{1,k}) > 1
             [forward,side,yaw] = convertData(result{1,k});
             
@@ -47,6 +48,7 @@ function [ data,concatdata ] = calcdata(output,output_time)
 
             time = [];
 
+            %Parsing time
             try        
                 curr = timeblocks(k);
                 block = curr{1};

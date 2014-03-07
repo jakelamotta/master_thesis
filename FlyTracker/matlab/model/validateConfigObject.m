@@ -11,7 +11,7 @@ function [ valid ] = validateConfigObject(config)
     %be a valid directory. Mice.txt must exist as that holds map for which
     %mouse is which
     try
-        valid = (str2num(config.port) < 65536) && (str2num(config.port) >1024) && exist(config.savepath,'dir') && exist('mice.txt','file');
+        valid = (config.port < 65536) && (config.port >1024) && exist(config.savepath,'dir') && exist('mice.txt','file');
     catch e
         valid = false;
     end

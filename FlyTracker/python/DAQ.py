@@ -6,10 +6,14 @@ import traceback
 import time
 import os
 
+
+
 #Global variables
 coords = [0,0,0,0]
 mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
 defaultPort = 3000 #Default port value for the trigger server to be listening on
+pipe = '/home/kristian/master_thesis/FlyTracker/data/pipe' #Must match the path in MainWindow.m
+running = True
 
 #Handles the mice sensors, inherits from Thread as it continously polls the coord variable
 #which in return is written to by the mice.
@@ -37,8 +41,11 @@ class MouseHandler(threading.Thread):
 		global coords
 		
 		try:	
+			#Daemon threads are all closed (not clean close) when all non-daemon threads are terminated
 			self.s1.setDaemon(True)
 			self.s2.setDaemon(True)	
+			
+			#Run the threads			
 			self.s1.start()
 			self.s2.start()
 		
@@ -47,7 +54,7 @@ class MouseHandler(threading.Thread):
 		
 		start = time.time()
 		
-		flag = True #flag for determining whether or blockmarker has been added or not
+		flag = True #flag for determining whether blockmarker has been added or not
 		while self.run_:					
 			sum_ = 0	
 			
@@ -135,14 +142,29 @@ class SensorMouse(AbstractMouse):
 				coords[2] = dx
 				coords[3] = dy
 
+class Trigger(threading.Thread):
+
+	def __init__(self):
+		self.handler = MouseHandler()
+		self.handler.setDaemon(True)
+		super(Trigger,self).__init__()
+
+	def run(self):
+		global pipe
+		self.handler.start()
+		print 'handler started'
+		cmd = open(pipe).read()		
+		print cmd
 
 #Listens on socket for signal from trigger client. Can start, pause and stop readings
 def runWithNetworkTrigger(args):
 	port = int(args['port'])
-	
+	global running
+
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.bind(('',port))
+		host = '' 
+		s.bind((host,port))
 		s.listen(1)
 		s.settimeout(120)	
 		
@@ -154,28 +176,32 @@ def runWithNetworkTrigger(args):
 		
 		if msg == 's':
 			print 's'
-			handler = MouseHandler()
-			handler.start()
+			t = Trigger()
+			t.start()
 		else:
 			print 'Not correct msg ',msg
-
+		
 		
 		#Runs until client process sends 'quit'-command		
-		while handler.run_:
+		while t.handler.run_:
 			
 			connection.close()
 			connection, addr = s.accept()     # Establish connection with client.
 			
 			trigger = connection.recv(1)
+
 			print 'Message rec: ',trigger
 			if trigger == 'p':
-				handler.pause = True
+				t.handler.pause = True
 				
 			elif trigger == 'q':
-				handler.stop()			
+				t.handler.stop()			
 			
 			elif trigger == 's':
-				handler.pause = False
+				t.handler.pause = False
+		
+		print 'thread is: ',t		
+		t.handler.stop()
 
 	except Exception:
 		print traceback.format_exc()
@@ -200,15 +226,14 @@ def runWithTimer(args):
 
 #Run DAQ without trigger, uses named pipe to communicate with matlab
 def runWithoutTrigger(args):
-
-	pipe = '/home/kristian/master_thesis/FlyTracker/data/pipe'
+	global pipe
 
 	handler = MouseHandler()
 	handler.start()
 
 	#Reads from pipe as soon as anything is written it stops
 	open(pipe).read().strip()
-	
+
 	handler.stop()
 	
 
@@ -223,22 +248,16 @@ def parseArgs(args):
 	return output
 
 	
-#Code that is run when calling the files
+#Code that is run when calling DAQ.py
 if __name__ == '__main__':
-	
+	#Precondition:
+	#System args must be in the form: 'function' 'parameter1' 'value1' 'parameter2' 'value2'...	
+
+
 	#Function map 
 	functions = {'network':runWithNetworkTrigger, 'notrigger':runWithoutTrigger, 'timer':runWithTimer}	
 
 	args = parseArgs(sys.argv) #sys.argv are arguments provided when calling function from commandline
 
-	functions[args['function']](args)	
-
-	##Solve this with function map instead, neater
-	
-	#"swich-case" for determining which function to run
-	#if args['function'] == 'network':
-#		openTriggerSocket(int(args['port']),args['host'])
-#	elif args['function'] == 'timer':
-#		runWithTimer(int(args['time']))
-#	elif args['function'] == 'notrigger':
-#		runWithoutTrigger()
+	#Launch provided function label
+	functions[args['function']](args)

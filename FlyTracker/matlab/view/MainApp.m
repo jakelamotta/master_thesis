@@ -92,7 +92,9 @@ function load_btn_Callback(hObject, eventdata, handles)
     %Try loading the config-file, if not successfull an error message is
     %displayed
     try
-        load(getpath('config.mat','code'));
+        getpath('config.mat','data');
+        load(getpath('config.mat','data'))
+        
         configFileFound = validateConfigObject(config);
     catch e
         configFileFound = false;

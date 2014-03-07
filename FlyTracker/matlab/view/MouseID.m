@@ -94,7 +94,7 @@ function next_btn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     config = getappdata(0,'config');
     
-    save(getpath('config.mat','code'),'config');
+    save(getpath('config.mat','data'),'config');
     
     MainWindow;
     close MouseID;
@@ -127,20 +127,22 @@ function id_btn_Callback(hObject, eventdata, handles)
     index = isstrprop(output,'digit');
     output(~index) = '';
     output = output(find(index,1):end);
+    
     try
         %If the ouput is of the proper form a succes-message will be shown
         if (str2num(output(1)) > -1)
             title = 'Success! Mouse identified.';
             message = strcat('Mouse ',output(1),' is used as an actual mouse');
             msgbox(message,title);  
+            
+            set(handles.next_btn,'Enable','on');
+            drawnow;
         end
     catch e
         errordlg('Something went wrong, please try again!');
     end
-        
     
     set(handles.hidden_txt,'visible','off');
     drawnow;
         
-    set(handles.next_btn,'Enable','on');
-    drawnow;    
+        

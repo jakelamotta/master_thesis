@@ -117,11 +117,15 @@ function ok_btn_Callback(hObject, eventdata, handles)
     
     input = get(handles.edit1,'String');
     
-    if isstrprop(input,'digit')        
-        config.setPort(input);
-        setappdata(0,'config',config);
+    if isstrprop(input,'digit')         
+        if (str2num(input) > 1024) && (str2num(input) < 65534)
+            config.setPort(input);
+            setappdata(0,'config',config);
         
-        close 'Network Settings';
+            close 'Network Settings';
+        else
+            errordlg('Not a valid port number, you must enter an integer between 1024 and 65000');
+        end
     else
         errordlg('Not a valid port number, you must enter an integer between 1024 and 65000');
     end

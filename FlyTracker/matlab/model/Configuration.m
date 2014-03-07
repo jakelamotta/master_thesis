@@ -15,13 +15,14 @@ classdef Configuration < handle
     
     methods (Access = 'public')
         
-        %Constructor for the config object
+        %Constructor for the config object setting default values which are
+        %later updated to user custom values
         function this = Configuration()
             this.port = 4444;
             this.trigger = 'no';
             this.runnable = true;
             time = 3000;
-            this.savepath = getpath('','code');
+            this.savepath = getpath('','data');
         end   
         
         %%%%%%%%%%SETTERS%%%%%%%%%%%%%%%%
@@ -34,17 +35,26 @@ classdef Configuration < handle
         end
         
         function savepath = setPath(this,path)
-            this.savepath = path;
+            %Path must exist
+            if exist(path,'dir')
+                this.savepath = path;
+            end
         end
         
         function time = setTime(this,t)
-            this.time = t;
+            %Time must be a positive integer
+            if str2num(t) > 1
+                this.time = t;
+            else
+                this.time = 3000;
+            end
+            
         end
         
         function port = setPort(this,p)
             %Validates portnumber before setting it
             if str2num(p) > 1024 && str2num(p) < 65535    
-                this.port = p;
+                this.port = str2num(p);
             else
                 this.port = 4444;
             end

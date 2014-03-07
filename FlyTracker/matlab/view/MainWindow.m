@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 27-Feb-2014 11:35:33
+% Last Modified by GUIDE v2.5 06-Mar-2014 15:35:51
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -76,9 +76,11 @@ else
     set(handles.no_rdbtn,'value',1);
 end
 
+%set(handles.popaxes1, 'String',enumeration('Plots'));
+
 %If tempdata still exists it means that the last run wasnt finished
 %properly, the data is still stored though. 
-if exist(getpath('tempdata.txt','code'))
+if exist(getpath('tempdata.txt','data'))
     q = questdlg('Something went wrong during the last recording and temporary data files havent been properly handled, do you want to recover the data?');
 
     if strcmp(q,'Yes')
@@ -93,8 +95,8 @@ if exist(getpath('tempdata.txt','code'))
         end
     else
         %Delete temp data files
-        delete(getpath('tempdata.txt','code'));
-        delete(getpath('temptime.txt','code'));
+        delete(getpath('tempdata.txt','data'));
+        delete(getpath('temptime.txt','data'));
     end
 end
 
@@ -116,17 +118,12 @@ function Untitled_1_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     
 % --------------------------------------------------------------------
-function Untitled_2_Callback(hObject, eventdata, handles)
-% hObject    handle to Untitled_2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-    
-% --------------------------------------------------------------------
 function Untitled_3_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     
+
 % --- Executes on button press in run_btn.
 function run_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to run_btn (see GCBO)
@@ -136,9 +133,10 @@ function run_btn_Callback(hObject, eventdata, handles)
     
     if config.runnable
         
-        %Save data to file with current date and time as filename
-        c = clock;
-        filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
+        if ~exist(getpath('pipe','data'),'file')
+            arg = ['mkfifo ',getpath('pipe','data')];
+            system(arg); %Create named pipe if not existing
+        end
         
         set(handles.run_btn,'String','Running..');
         drawnow;
@@ -146,7 +144,7 @@ function run_btn_Callback(hObject, eventdata, handles)
         
         %Running with network trigger
         if get(handles.network_rdbtn,'value')
-            arg = ['echo "hoverfly" | sudo -S python ',getpath('DAQ.py','py'),' "network" "port"',' ',port];
+            arg = ['echo "hoverfly" | sudo -S python ',getpath('DAQ.py','py'),' "network" "port"',' ',port,' &'];
             system(arg);
             
         %Running with timer
@@ -163,46 +161,11 @@ function run_btn_Callback(hObject, eventdata, handles)
             end
             
         %Running with no trigger
-        elseif get(handles.no_rdbtn,'value')
-            
+        elseif get(handles.no_rdbtn,'value')            
             arg = ['echo "hoverfly" | sudo -S python ',getpath('DAQ.py','py'),' "notrigger" &'];
-            system(arg);
-            
-            pause(.2);
-            
-            if ~exist(getpath('pipe','code'),'file')
-                arg = ['mkfifo ',getpath('pipe','code')]
-                system(arg); %Create named pipe if not existing
-            end
-            
-            h = msgbox('Data aquisition has started, press ok (Enter) to stop it');
-                        
-            waitfor(h);
-            
-            %Code for communicating with python process
-            fid = fopen(getpath('pipe','code'),'w');
-            fwrite(fid,'quit');      %Write quit command to the pipe
-            fclose(fid);             %Close pipe
-            
-            %Clean up, deleting the pipe
-            arg = ['rm -f ',getpath('pipe','code')]
-            system(arg);
-        end
-        
-        [output,output_time] = opentempdata();
-
-        set(handles.run_btn,'String','Run');
-        drawnow;
-       
-        if ~strcmp(output,'')
-            saveAndDisplayData(handles,output,output_time,filename);
-            
-        else
-            msgbox('No data was recorded!','Failure');
-        end
-            
-        
-            
+            system(arg);            
+        end       
+             
             
     else
         q = questdlg('Configuration isnt done so no experiments can be run. Would you like to configure the system now?');
@@ -219,7 +182,32 @@ function stop_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to stop_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    msgbox('Not yet implemented');
+    config = getappdata(0,'config')
+    
+    %Save data to file with current date and time as filename
+    c = clock;
+    filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
+    
+    %Code for communicating with python process
+    fid = fopen(getpath('pipe','data'),'w');
+    fwrite(fid,'quit');      %Write quit command to the pipe
+    fclose(fid);             %Close pipe
+            
+    %Clean up, deleting the pipe
+    arg = ['rm -f ',getpath('pipe','data')]
+    system(arg);
+    
+    [output,output_time] = opentempdata();
+
+    set(handles.run_btn,'String','Run');
+    drawnow;
+       
+    if ~strcmp(output,'')
+        saveAndDisplayData(handles,output,output_time,filename);
+            
+    else
+        msgbox('No data was recorded!','Failure');
+    end
     
 
 
@@ -238,7 +226,8 @@ function manual_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to manual_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    system('evince helpmanual.pdf');
+    arg = ['evince ',getpath('helpmanual.pdf','')];
+    system(arg);
 
 % --------------------------------------------------------------------
 function about_menu_item_Callback(hObject, eventdata, handles)
@@ -318,20 +307,48 @@ function no_trigger_menu_Callback(hObject, eventdata, handles)
 % hObject    handle to no_trigger_menu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    if strcmp(config.trigger,'network')
+        set(handles.network_rdbtn,'value',1);
+        %set(handles.network_menu_item,'Checked','On');
 
+    elseif strcmp(config.trigger,'timer')
+        set(handles.timer_rdbtn,'value',1);
+        %set(handles.timer_menu_item,'Checked','On');
+    else
+        set(handles.no_rdbtn,'value',1);
+    end
 
 % --------------------------------------------------------------------
 function mouse_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to mouse_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    if strcmp(config.trigger,'network')
+        set(handles.network_rdbtn,'value',1);
+        %set(handles.network_menu_item,'Checked','On');
 
+    elseif strcmp(config.trigger,'timer')
+        set(handles.timer_rdbtn,'value',1);
+        %set(handles.timer_menu_item,'Checked','On');
+    else
+        set(handles.no_rdbtn,'value',1);
+    end
 
 % --------------------------------------------------------------------
 function timer_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to timer_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+    if strcmp(config.trigger,'network')
+        set(handles.network_rdbtn,'value',1);
+        %set(handles.network_menu_item,'Checked','On');
+
+    elseif strcmp(config.trigger,'timer')
+        set(handles.timer_rdbtn,'value',1);
+        %set(handles.timer_menu_item,'Checked','On');
+    else
+        set(handles.no_rdbtn,'value',1);
+    end    
 
 function timer_edt_Callback(hObject, eventdata, handles)
 % hObject    handle to timer_edt (see GCBO)
@@ -364,19 +381,20 @@ function figure1_DeleteFcn(hObject, eventdata, handles)
 
     config = getappdata(0,'config');
     
-    config.setTime(get(handles.timer_edt,'String'));
-    
-    
-    if get(handles.network_rdbtn, 'value') == 1
-        config.setNetworkTrigger('network');
-    elseif get(handles.timer_rdbtn, 'value') == 1
-        config.setNetworkTrigger('timer');
-    else
-        config.setNetworkTrigger('no');
-    end   
-    
-    save(getpath('config.mat','code'), 'config');
+    if config.runnable
+        config.setTime(get(handles.timer_edt,'String'));
 
+
+        if get(handles.network_rdbtn, 'value') == 1
+            config.setNetworkTrigger('network');
+        elseif get(handles.timer_rdbtn, 'value') == 1
+            config.setNetworkTrigger('timer');
+        else
+            config.setNetworkTrigger('no');
+        end   
+
+        save(getpath('config.mat','data'), 'config');
+    end
 
 % --------------------------------------------------------------------
 function addr_item_Callback(hObject, eventdata, handles)
@@ -385,4 +403,100 @@ function addr_item_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     host;
     
-    
+% --------------------------------------------------------------------
+function Untitled_2_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in popaxes1.
+function popaxes1_Callback(hObject, eventdata, handles)
+% hObject    handle to popaxes1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popaxes1 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popaxes1
+
+
+% --- Executes during object creation, after setting all properties.
+function popaxes1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popaxes1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu2.
+function popupmenu2_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu2 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu2
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu3.
+function popupmenu3_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu3 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu3
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu3_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes on selection change in popupmenu4.
+function popupmenu4_Callback(hObject, eventdata, handles)
+% hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu4 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from popupmenu4
+
+
+% --- Executes during object creation, after setting all properties.
+function popupmenu4_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

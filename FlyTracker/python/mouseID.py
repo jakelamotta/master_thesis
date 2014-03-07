@@ -2,7 +2,8 @@ import DAQ
 import utilities
 import traceback
 
-	
+
+#Function for id:ing mice	
 def idMouse():
 	global micePositions
 	mice = []	
@@ -14,6 +15,7 @@ def idMouse():
 		mice.append(m)		
 
 	run = True	
+	
 	while run:
 		for mouse_ in mice:
 			if mouse_.id != -1:
