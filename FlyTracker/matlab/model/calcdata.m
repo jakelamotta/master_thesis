@@ -114,11 +114,11 @@ end
 %Function that do the actual calculation of fly movement by transforming
 %the mouse input data to fly's forward,sideway and yaw delta coords
 function [forward,side,yaw] = convertData(data)
-
+    plot(data)
     %Calibration data, hardcoded for testing purposes will be changed to
     %dynamic values later
-    alpha_ = 0.38;
-    omega = -45;
+    alpha_ = .1;
+    omega = 90;
     r = .04;
 
     %Init result arrays

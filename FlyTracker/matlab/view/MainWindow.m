@@ -149,6 +149,9 @@ function run_btn_Callback(hObject, eventdata, handles)
             
         %Running with timer
         elseif get(handles.timer_rdbtn,'value')
+            c = clock;
+            filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
+
             input = get(handles.timer_edt,'String');
             if isstrprop(input,'digit')
                 
@@ -158,6 +161,18 @@ function run_btn_Callback(hObject, eventdata, handles)
             
             else
                 errordlg('Timer input must be an integer, please try again');
+            end
+            
+            [output,output_time] = opentempdata();
+
+            set(handles.run_btn,'String','Run');
+            drawnow;
+
+            if ~strcmp(output,'')
+                saveAndDisplayData(handles,output,output_time,filename);
+
+            else
+                msgbox('No data was recorded!','Failure');
             end
             
         %Running with no trigger

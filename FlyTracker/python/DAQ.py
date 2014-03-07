@@ -142,77 +142,79 @@ class SensorMouse(AbstractMouse):
 				coords[2] = dx
 				coords[3] = dy
 
-class Trigger(threading.Thread):
+#Class for handling the network connection
+class socketHandler(threading.Thread):
 
-	def __init__(self):
+	def __init__(self,p):
+		self.port = p
 		self.handler = MouseHandler()
-		self.handler.setDaemon(True)
-		super(Trigger,self).__init__()
+		self.handler.setDaemon(True) #Setting thread to daemon means its terminated as all non-threads are terminated (not a clean exit)
+
+		super(socketHandler,self).__init__()
 
 	def run(self):
-		global pipe
-		self.handler.start()
-		print 'handler started'
-		cmd = open(pipe).read()		
-		print cmd
+
+		try:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			
+			s.bind(('',self.port)) #Using '' is prefferable compared to IP-address
+			s.listen(1)
+			s.settimeout(120)	
+		
+			print 'connection is running on localhost'
+			connection, addr = s.accept()     # Establish connection with client.
+			print 'Connection accepted from ',addr
+	
+			msg = connection.recv(1)
+		
+			if msg == 's':
+				print 's'
+				self.handler.start()
+			
+			else:
+				print 'Not correct msg ',msg
+		
+		
+			#Runs until client process sends 'quit'-command		
+			while self.handler.run_:
+			
+				connection.close()
+				connection, addr = s.accept()     # Establish connection with client.
+			
+				trigger = connection.recv(1)
+
+				print 'Message rec: ',trigger
+				if trigger == 'p':
+					self.handler.pause = True
+				elif trigger == 's':
+					self.handler.pause = False
+		
+
+		except Exception:
+			print traceback.format_exc()
+			utilities.FileHandler.logException(traceback.format_exc())	
+		finally: 
+			s.shutdown(socket.SHUT_RDWR)
+
+			try:
+				connection.close()                # Close the connection
+			except UnboundLocalError:
+				pass
+				
+
 
 #Listens on socket for signal from trigger client. Can start, pause and stop readings
 def runWithNetworkTrigger(args):
 	port = int(args['port'])
-	global running
-
-	try:
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		host = '' 
-		s.bind((host,port))
-		s.listen(1)
-		s.settimeout(120)	
-		
-		print 'connection is running on ',host
-		connection, addr = s.accept()     # Establish connection with client.
-		print 'Connection accepted from ',addr
 	
-		msg = connection.recv(1)
-		
-		if msg == 's':
-			print 's'
-			t = Trigger()
-			t.start()
-		else:
-			print 'Not correct msg ',msg
-		
-		
-		#Runs until client process sends 'quit'-command		
-		while t.handler.run_:
-			
-			connection.close()
-			connection, addr = s.accept()     # Establish connection with client.
-			
-			trigger = connection.recv(1)
+	handler = socketHandler(port)
+	handler.setDaemon(True)
+	handler.start()
 
-			print 'Message rec: ',trigger
-			if trigger == 'p':
-				t.handler.pause = True
-				
-			elif trigger == 'q':
-				t.handler.stop()			
-			
-			elif trigger == 's':
-				t.handler.pause = False
-		
-		print 'thread is: ',t		
-		t.handler.stop()
+	#Reads from pipe as soon as anything is read it stops and all daemon threads are closed aswell
+	open(pipe).read().strip()
 
-	except Exception:
-		print traceback.format_exc()
-		utilities.FileHandler.logException(traceback.format_exc())	
-	finally: 
-		s.shutdown(socket.SHUT_RDWR)
-
-		try:
-			connection.close()                # Close the connection
-		except UnboundLocalError:
-			pass
+	
 
 #Run DAQ with timer
 #Paramter time should be in ms
@@ -247,6 +249,12 @@ def parseArgs(args):
 		
 	return output
 
+def runHandler(port, handler):
+
+	pass
+
+	
+
 	
 #Code that is run when calling DAQ.py
 if __name__ == '__main__':
@@ -261,3 +269,4 @@ if __name__ == '__main__':
 
 	#Launch provided function label
 	functions[args['function']](args)
+	
