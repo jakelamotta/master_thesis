@@ -61,8 +61,6 @@ guidata(hObject, handles);
 % UIWAIT makes MiceSetup wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
-config = Configuration();
-setappdata(0,'config',config);
 
 % --- Outputs from this function are returned to the command line.
 function varargout = MiceSetup_OutputFcn(hObject, eventdata, handles) 

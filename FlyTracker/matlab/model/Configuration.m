@@ -11,6 +11,7 @@ classdef Configuration < handle
         runnable;
         time;
         savepath;
+        pwd;
     end
     
     methods (Access = 'public')
@@ -23,25 +24,30 @@ classdef Configuration < handle
             this.runnable = true;
             time = 3000;
             this.savepath = getpath('','data');
+            this.pwd = '';
         end   
         
         %%%%%%%%%%SETTERS%%%%%%%%%%%%%%%%
-        function trigger = setNetworkTrigger(this,t)
+        function setNetworkTrigger(this,t)
             this.trigger = t;
         end
         
-        function runnable = setRunnable(this,bool)
+        function setRunnable(this,bool)
             this.runnable = bool;
         end
         
-        function savepath = setPath(this,path)
+        function setPath(this,path)
             %Path must exist
             if exist(path,'dir')
                 this.savepath = path;
             end
         end
         
-        function time = setTime(this,t)
+        function setPw(this,p)
+            this.pwd = p;
+        end
+        
+        function setTime(this,t)
             %Time must be a positive integer
             if str2num(t) > 1
                 this.time = t;
@@ -51,7 +57,7 @@ classdef Configuration < handle
             
         end
         
-        function port = setPort(this,p)
+        function setPort(this,p)
             %Validates portnumber before setting it
             if str2num(p) > 1024 && str2num(p) < 65535    
                 this.port = str2num(p);

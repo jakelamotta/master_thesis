@@ -2,7 +2,7 @@ function [path] = getpath(file,folder)
 %Returns correct path for given file and type, only the relative paths are
 %hardcoded
 
-tmp = mfilename('fullpath');
+tmp = mfilename('fullpath'); %Returns path of current m-file
 
 prefixpy = [tmp(1:end-length(mfilename)),'python/'];
 prefixview = [tmp(1:end-length(mfilename)),'matlab/view/'];

@@ -117,10 +117,11 @@ function id_btn_Callback(hObject, eventdata, handles)
     %inputs
     set(handles.hidden_txt,'visible','on');
     drawnow;
+    config = getappdata(0,'config');
     
     %System call to run the python function mouseID which is the one doing
     %the actual identification 
-    arg = ['echo "hoverfly" | sudo -S python ',getpath('mouseID.py','py')]
+    arg = ['echo ',config.pwd,' | sudo -S python ',getpath('mouseID.py','py')]
     [~,output] = system(arg);
     
     %Functionality to strip the resulting output from any non-digit characters

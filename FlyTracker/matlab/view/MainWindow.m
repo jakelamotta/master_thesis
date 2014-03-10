@@ -130,57 +130,60 @@ function run_btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     config = getappdata(0,'config')
-    
     if config.runnable
-        
-        if ~exist(getpath('pipe','data'),'file')
-            arg = ['mkfifo ',getpath('pipe','data')];
-            system(arg); %Create named pipe if not existing
-        end
-        
-        set(handles.run_btn,'String','Running..');
-        drawnow;
-        port =  num2str(config.port);
-        
-        %Running with network trigger
-        if get(handles.network_rdbtn,'value')
-            arg = ['echo "hoverfly" | sudo -S python ',getpath('DAQ.py','py'),' "network" "port"',' ',port,' &'];
-            system(arg);
-            
-        %Running with timer
-        elseif get(handles.timer_rdbtn,'value')
-            c = clock;
-            filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
-
-            input = get(handles.timer_edt,'String');
-            if isstrprop(input,'digit')
-                
-                time = num2str(input);
-                arg = ['echo "hoverfly" | sudo -S python ',getpath('DAQ.py','py'),' "timer" "time"',' ',time];
-                system(arg);
-            
-            else
-                errordlg('Timer input must be an integer, please try again');
+        if ~strcmp(config.pwd,'') && length(getappdata(0,'pass')) == 0
+            setappdata(0,'pass',config.pwd);
+        elseif strcmp(config.pwd,'') && length(getappdata(0,'pass')) == 0 
+            PwQuery;
+        end 
+            if ~exist(getpath('pipe','data'),'file')
+                arg = ['mkfifo ',getpath('pipe','data')];
+                system(arg); %Create named pipe if not existing
             end
-            
-            [output,output_time] = opentempdata();
 
-            set(handles.run_btn,'String','Run');
+            set(handles.run_btn,'String','Running..');
             drawnow;
+            port =  num2str(config.port);
 
-            if ~strcmp(output,'')
-                saveAndDisplayData(handles,output,output_time,filename);
+            %Running with network trigger
+            if get(handles.network_rdbtn,'value')
+                arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "network" "port"',' ',port,' &'];
+                system(arg);
 
-            else
-                msgbox('No data was recorded!','Failure');
+            %Running with timer
+            elseif get(handles.timer_rdbtn,'value')
+                c = clock;
+                filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
+
+                input = get(handles.timer_edt,'String');
+                if isstrprop(input,'digit')
+
+                    time = num2str(input);
+                    arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "timer" "time"',' ',time];
+                    system(arg);
+
+                else
+                    errordlg('Timer input must be an integer, please try again');
+                end
+
+                [output,output_time] = opentempdata();
+
+                set(handles.run_btn,'String','Run');
+                drawnow;
+
+                if ~strcmp(output,'')
+                    saveAndDisplayData(handles,output,output_time,filename);
+
+                else
+                    msgbox('No data was recorded!','Failure');
+                end
+
+            %Running with no trigger
+            elseif get(handles.no_rdbtn,'value')            
+                arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "notrigger" &'];
+                system(arg);            
             end
             
-        %Running with no trigger
-        elseif get(handles.no_rdbtn,'value')            
-            arg = ['echo "hoverfly" | sudo -S python ',getpath('DAQ.py','py'),' "notrigger" &'];
-            system(arg);            
-        end       
-             
             
     else
         q = questdlg('Configuration isnt done so no experiments can be run. Would you like to configure the system now?');
@@ -269,7 +272,7 @@ function confgiure_menu_item_Callback(hObject, eventdata, handles)
         
         if strcmp(button,'Yes')
             clear all;
-            MiceSetup;
+            PwQuery('temp');
             close 'FlyTracker 1.0';
         end
         
@@ -398,8 +401,7 @@ function figure1_DeleteFcn(hObject, eventdata, handles)
     
     if config.runnable
         config.setTime(get(handles.timer_edt,'String'));
-
-
+        
         if get(handles.network_rdbtn, 'value') == 1
             config.setNetworkTrigger('network');
         elseif get(handles.timer_rdbtn, 'value') == 1

@@ -1,7 +1,17 @@
 import json
 import time
 
-path = '/home/kristian/master_thesis/FlyTracker/data/'
+####EDIT START##########
+
+path = '/home/kristian/master_thesis/' #set to location of FlyTracker folder
+
+####EDIT STOP###########
+
+path_pipe = path+'FlyTracker/data/pipe'
+path_data = path+'FlyTracker/data/'#'/home/kristian/master_thesis/FlyTracker/data/'
+
+
+
 
 #Class for file input/output handling
 class FileHandler:
@@ -12,13 +22,13 @@ class FileHandler:
 	@staticmethod
 	def saveToFile(toSave,fileName,*args):
 		e = 'w'
-		global path
+		global path_data
 
 		for arg in args:
 			e = arg		
 			
 		try:
-			f = open(path+fileName,e)
+			f = open(path_data+fileName,e)
 			output = json.dumps(toSave)
 			f.write(output)
 	
@@ -30,10 +40,10 @@ class FileHandler:
 	#Output is object retrieved from the json-string 
 	@staticmethod
 	def loadFromFile(fileName,*args):
-		global path
+		global path_data
 	
 		try:
-			f = open(path+fileName,'r')
+			f = open(path_data+fileName,'r')
 			input_ = f.read()
 			obj = json.loads(input_)
 		except IOError:
@@ -60,3 +70,14 @@ class Utilities:
 	@staticmethod
 	def toSigned(n):
 		return n - ((0x80 & n) << 1)
+
+	@staticmethod
+	def getPath(arg):
+		global path, path_pipe
+		if arg == 'pipe':
+			return path_pipe
+		elif arg == 'data':
+			return path_data
+
+
+

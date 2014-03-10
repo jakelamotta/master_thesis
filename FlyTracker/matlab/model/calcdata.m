@@ -3,7 +3,14 @@ function [ data,concatdata ] = calcdata(output,output_time)
 %output_time has very specific restrictions on them, see help manual for
 %this. Returns data divided into blocks and the fully concatenated data
 %cell. The latter is used for plotting and is not saved.
-    
+%*******************************************************
+%Precondition:
+%Input format 
+%Output: "00000""00000""00000""00000....00000"
+%Output_time: "000000""000000""000000""000000....000000"
+%Blocks separated by "*"
+%*******************************************************
+
     %Divide raw input into blocks for data and time respectively
     [datablocks,timeblocks] = parseInput(output,output_time);
     
@@ -67,8 +74,8 @@ function [ data,concatdata ] = calcdata(output,output_time)
             catch Exception
                 errordlg('Something went wrong with the timestamps, please try again', 'Corrupt data');        
             end    
-
-            time(end+1) = 0;
+            ta = time(end)
+            time(end+1) = ta;
             data{4,k} = time;
         end
         
@@ -81,32 +88,25 @@ end
 %Function that concatenate all blocks in one data cell for each variable
 %respectively and the resulting cell will be a 4x1 cell. If the input is
 %already of this dimension the input is returned.
-function [fullsequence] = concatBlocks(data)
+function [concatdata] = concatBlocks(data)
 
    len = size(data);
-   
-   
+      
    %len(2) is number of blocks, if only one concatenating is not needed
    if len(2) > 1
-       fullsequence = cell(4,1);
-
-       
-%Probabaly remove later       
-%        fullsequence{1,1} = [data{1,1}];
-%        fullsequence{2,1} = [data{2,1}];
-%        fullsequence{3,1} = [data{3,1}];
-%        fullsequence{4,1} = [data{4,1}];
+       concatdata = cell(4,1);
 
        for i=1:len(2)
            if length(data{1,i}) ~= 0
-               fullsequence{1,1} = [fullsequence{1,1},data{1,i}];
-               fullsequence{2,1} = [fullsequence{2,1},data{2,i}];
-               fullsequence{3,1} = [fullsequence{3,1},data{3,i}];
-               fullsequence{4,1} = [fullsequence{4,1},data{4,i}];
+               concatdata{1,1} = [concatdata{1,1},data{1,i}];
+               concatdata{2,1} = [concatdata{2,1},data{2,i}];
+               concatdata{3,1} = [concatdata{3,1},data{3,i}];
+               concatdata{4,1} = [concatdata{4,1},data{4,i}];
            end           
        end
    else
-       fullsequence = data;
+       %Data is consisiting of one block only
+       concatdata = data;
    end
 
 end
@@ -114,12 +114,12 @@ end
 %Function that do the actual calculation of fly movement by transforming
 %the mouse input data to fly's forward,sideway and yaw delta coords
 function [forward,side,yaw] = convertData(data)
-    plot(data)
+    %plot(data)
     %Calibration data, hardcoded for testing purposes will be changed to
     %dynamic values later
-    alpha_ = .1;
-    omega = 90;
-    r = .04;
+    alpha_ = .105;
+    omega = 0;%-pi/2;
+    r = 25;
 
     %Init result arrays
     len = length(data)/4;
@@ -130,16 +130,16 @@ function [forward,side,yaw] = convertData(data)
 
     %Do actual calculations. See: "FicTrac: A visual method for tracking
     %spherical motion and generating fictive animal paths"
-    for i=1:(len-5)
+    for i=1:4:(len-5)
         current = data(i:i+3);
 
-        w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[current(2);current(4)];
+        w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[current(4);current(2)];
 
         w_mz = alpha_*(current(1)+current(3))/(2*r);
 
         side(i) = w_m(1);
         forward(i) = w_m(2);
-        yaw(i) = w_mz;    
+        yaw(i) = w_mz*180/pi;    
     end
 
 end

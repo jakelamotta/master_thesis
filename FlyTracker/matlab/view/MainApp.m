@@ -79,7 +79,7 @@ function start_btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     clear all;
-    MiceSetup;
+    PwQuery('a');
     close Welcome;
 
 % --- Executes on button press in load_btn.

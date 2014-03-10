@@ -5,20 +5,30 @@ function [] = saveAndDisplayData(handles,output,output_time, filename)
 save(filename,'data');
 
 %Plot for forward velocity
-plot(handles.axes1,fulldata{4,1},fulldata{1,1},'+');
+plot(handles.axes1,fulldata{4,1},cumsum(fulldata{1,1}));
 title(handles.axes1,'Forward velocity');
 
 %Plot for sideway velocity
-plot(handles.axes2,fulldata{4,1},fulldata{2,1});
+plot(handles.axes2,fulldata{4,1},cumsum(fulldata{2,1}));
 title(handles.axes2,'Sideway velocity');
 
 %Plot for yaw velocity
-plot(handles.axes3,fulldata{4,1},fulldata{3,1},'.','MarkerSize',5.10);
+plot(handles.axes3,fulldata{4,1},cumsum(fulldata{3,1}));
 title(handles.axes3,'Rotational velocity (yaw)');
+
+%Plot for yaw velocity
+plot(handles.axes4,cumsum(fulldata{2,1}),cumsum(fulldata{1,1}));
+title(handles.axes4,'2D-map');
+
+min_ = min(min(cumsum(fulldata{1,1}),cumsum(fulldata{2,1})));
+max_ = max(max(cumsum(fulldata{1,1}),cumsum(fulldata{2,1})));
+
+axis([min_ max_ min_ max_]);
+axis square;
+
 
 %Delete temp data files
 delete(getpath('tempdata.txt','data'));
 delete(getpath('temptime.txt','data'));
 
 end
-

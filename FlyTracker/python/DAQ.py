@@ -12,7 +12,8 @@ import os
 coords = [0,0,0,0]
 mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
 defaultPort = 3000 #Default port value for the trigger server to be listening on
-pipe = '/home/kristian/master_thesis/FlyTracker/data/pipe' #Must match the path in MainWindow.m
+pipe = utilities.Utilities.getPath('pipe')
+
 running = True
 
 #Handles the mice sensors, inherits from Thread as it continously polls the coord variable
@@ -249,13 +250,6 @@ def parseArgs(args):
 		
 	return output
 
-def runHandler(port, handler):
-
-	pass
-
-	
-
-	
 #Code that is run when calling DAQ.py
 if __name__ == '__main__':
 	#Precondition:
@@ -264,7 +258,6 @@ if __name__ == '__main__':
 
 	#Function map 
 	functions = {'network':runWithNetworkTrigger, 'notrigger':runWithoutTrigger, 'timer':runWithTimer}	
-
 	args = parseArgs(sys.argv) #sys.argv are arguments provided when calling function from commandline
 
 	#Launch provided function label
