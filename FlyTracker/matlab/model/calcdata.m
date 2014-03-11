@@ -117,7 +117,7 @@ function [forward,side,yaw] = convertData(data)
     %plot(data)
     %Calibration data, hardcoded for testing purposes will be changed to
     %dynamic values later
-    alpha_ = .105;
+    alpha_ = .0185;
     omega = 0;%-pi/2;
     r = 25;
 
