@@ -127,13 +127,15 @@ function [forward,side,yaw] = convertData(data)
     forward = zeros(1,len);
     yaw = zeros(1,len);
 
-
+    data = reshape(data,4,len);
+    size_ = size(data);
+    
     %Do actual calculations. See: "FicTrac: A visual method for tracking
     %spherical motion and generating fictive animal paths"
-    for i=1:4:(len-5)
-        current = data(i:i+3);
-
-        w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[current(4);current(2)];
+    for i=1:size_(2)
+        current = transpose(data(:,i));
+        
+        w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[current(2);current(4)];
 
         w_mz = alpha_*(current(1)+current(3))/(2*r);
 
