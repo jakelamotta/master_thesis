@@ -12,6 +12,7 @@ classdef Configuration < handle
         time;
         savepath;
         pwd;
+        alpha_;
     end
     
     methods (Access = 'public')
@@ -25,6 +26,7 @@ classdef Configuration < handle
             time = 3000;
             this.savepath = getpath('','data');
             this.pwd = '';
+            this.alpha_ = 1;
         end   
         
         %%%%%%%%%%SETTERS%%%%%%%%%%%%%%%%
@@ -64,6 +66,10 @@ classdef Configuration < handle
             else
                 this.port = 4444;
             end
+        end
+        
+        function setAlpha(this,a)
+            this.alpha_ = a;
         end
     end
     

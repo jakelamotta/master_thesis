@@ -237,7 +237,32 @@ function stop_btn_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-    msgbox('Not yet implemented');
+    config = getappdata(0,'config')
+    
+    %Save data to file with current date and time as filename
+    c = clock;
+    filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
+    
+    %Code for communicating with python process
+    fid = fopen(getpath('pipe','data'),'w');
+    fwrite(fid,'quit');      %Write quit command to the pipe
+    fclose(fid);             %Close pipe
+            
+    %Clean up, deleting the pipe
+    arg = ['rm -f ',getpath('pipe','data')]
+    system(arg);
+    
+    [output,output_time] = opentempdata();
+
+    set(handles.run_btn,'String','Run');
+    drawnow;
+       
+    if ~strcmp(output,'')
+        saveAndDisplayData(handles,output,output_time,filename);
+            
+    else
+        msgbox('No data was recorded!','Failure');
+    end
 
 % --------------------------------------------------------------------
 function manual_menu_item_Callback(hObject, eventdata, handles)

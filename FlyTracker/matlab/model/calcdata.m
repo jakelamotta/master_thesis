@@ -68,14 +68,13 @@ function [ data,concatdata ] = calcdata(output,output_time)
                     end
 
                     str_ = strcat(block(a),block(a+1),block(a+2),block(a+3),block(a+4),block(a+5));
-                    time(i) = str2num(str_);
+                    time(end+1) = str2num(str_);
                     a = a+8;
                 end
             catch Exception
                 errordlg('Something went wrong with the timestamps, please try again', 'Corrupt data');        
-            end    
-            ta = time(end)
-            time(end+1) = ta;
+            end
+            
             data{4,k} = time;
         end
         
@@ -118,7 +117,7 @@ function [forward,side,yaw] = convertData(data)
     %Calibration data, hardcoded for testing purposes will be changed to
     %dynamic values later
     alpha_ = .0185;
-    omega = 0;%-pi/2;
+    omega = 0;%pi/4;
     r = 25;
 
     %Init result arrays
@@ -141,7 +140,7 @@ function [forward,side,yaw] = convertData(data)
 
         side(i) = w_m(1);
         forward(i) = w_m(2);
-        yaw(i) = w_mz*180/pi;    
+        yaw(i) = w_mz;%*180/pi;    
     end
 
 end

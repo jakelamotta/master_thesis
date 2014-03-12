@@ -16,12 +16,15 @@ title(handles.axes2,'Sideway velocity');
 plot(handles.axes3,fulldata{4,1},cumsum(fulldata{3,1}));
 title(handles.axes3,'Rotational velocity (yaw)');
 
+
+[x,y] = calc2DPath(fulldata);
+
 %Plot for yaw velocity
-plot(handles.axes4,cumsum(fulldata{2,1}),cumsum(fulldata{1,1}));
+plot(handles.axes4,x,y);
 title(handles.axes4,'2D-map');
 
-min_ = min(min(cumsum(fulldata{1,1}),cumsum(fulldata{2,1})));
-max_ = max(max(cumsum(fulldata{1,1}),cumsum(fulldata{2,1})));
+min_ = min(min(y,x));
+max_ = max(max(y,x));
 
 axis([min_ max_ min_ max_]);
 axis square;
