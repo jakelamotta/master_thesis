@@ -22,7 +22,7 @@ function varargout = About(varargin)
 
 % Edit the above text to modify the response to help About
 
-% Last Modified by GUIDE v2.5 03-Mar-2014 11:54:32
+% Last Modified by GUIDE v2.5 13-Mar-2014 12:10:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -71,3 +71,12 @@ function varargout = About_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
+
+
+% --- Executes on button press in ok_btn.
+function ok_btn_Callback(hObject, eventdata, handles)
+% hObject    handle to ok_btn (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+    close About;

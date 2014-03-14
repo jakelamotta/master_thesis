@@ -84,19 +84,19 @@ if exist(getpath('tempdata.txt','data'))
     q = questdlg('Something went wrong during the last recording and temporary data files havent been properly handled, do you want to recover the data?');
 
     if strcmp(q,'Yes')
-        [output,output_time] = opentempdata();
+        [output] = opentempdata();
         
         if ~strcmp(output,'')
             c = clock;
             filename = strcat(config.savepath,'/recovereddata_',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
-            saveAndDisplayData(handles,output,output_time,filename);
+            saveAndDisplayData(handles,output,filename);
         else
             msgbox('No data was recorded!','Failure');
         end
     else
         %Delete temp data files
         delete(getpath('tempdata.txt','data'));
-        delete(getpath('temptime.txt','data'));
+        %delete(getpath('temptime.txt','data'));
     end
 end
 
@@ -159,24 +159,25 @@ function run_btn_Callback(hObject, eventdata, handles)
                 if isstrprop(input,'digit')
 
                     time = num2str(input);
-                    arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "timer" "time"',' ',time];
+                    arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "timer" "time"',' ',time,' &'];
                     system(arg);
 
                 else
                     errordlg('Timer input must be an integer, please try again');
                 end
 
-                [output,output_time] = opentempdata();
+                %output = opentempdata();
+                readData(handles,filename);
 
                 set(handles.run_btn,'String','Run');
                 drawnow;
 
-                if ~strcmp(output,'')
-                    saveAndDisplayData(handles,output,output_time,filename);
-
-                else
-                    msgbox('No data was recorded!','Failure');
-                end
+%                 if ~strcmp(output,'')
+%                     %saveAndDisplayData(handles,output,filename);
+%                     
+%                 else
+%                     msgbox('No data was recorded!','Failure');
+%                 end
 
             %Running with no trigger
             elseif get(handles.no_rdbtn,'value')            
@@ -215,14 +216,14 @@ function stop_btn_Callback(hObject, eventdata, handles)
     arg = ['rm -f ',getpath('pipe','data')]
     system(arg);
     
-    [output,output_time] = opentempdata();
+    output = opentempdata();
 
     set(handles.run_btn,'String','Run');
     drawnow;
        
     if ~strcmp(output,'')
-        saveAndDisplayData(handles,output,output_time,filename);
-            
+        %saveAndDisplayData(handles,output,filename);
+        readData(handles,filename);   
     else
         msgbox('No data was recorded!','Failure');
     end
@@ -252,13 +253,14 @@ function stop_btn_KeyPressFcn(hObject, eventdata, handles)
     arg = ['rm -f ',getpath('pipe','data')]
     system(arg);
     
-    [output,output_time] = opentempdata();
+    output = opentempdata();
 
     set(handles.run_btn,'String','Run');
     drawnow;
        
     if ~strcmp(output,'')
-        saveAndDisplayData(handles,output,output_time,filename);
+        %saveAndDisplayData(handles,output,filename);
+        readData(handles,filename);   
             
     else
         msgbox('No data was recorded!','Failure');
@@ -269,7 +271,7 @@ function manual_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to manual_menu_item (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    arg = ['evince ',getpath('helpmanual.pdf','')];
+    arg = ['evince ',getpath('helpmanual.pdf',''),' &'];
     system(arg);
 
 % --------------------------------------------------------------------
@@ -297,8 +299,8 @@ function confgiure_menu_item_Callback(hObject, eventdata, handles)
         
         if strcmp(button,'Yes')
             clear all;
-            PwQuery('temp');
-            close 'FlyTracker 1.0';
+            PwQuery('a');
+            close 'FlyTracker 1.0'
         end
         
     else

@@ -5,11 +5,14 @@ import utilities
 import traceback
 import time
 import os
-
+import json
+				
 
 
 #Global variables
 coords = [0,0,0,0]
+coordinates = {"x_1":"0","y_1":"0","x_2":"0","y_2":"0","time":"0","block_time":"0"}
+
 mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
 defaultPort = 3000 #Default port value for the trigger server to be listening on
 pipe = utilities.Utilities.getPath('pipe')
@@ -57,26 +60,35 @@ class MouseHandler(threading.Thread):
 		
 		flag = True #flag for determining whether blockmarker has been added or not
 		while self.run_:					
-			sum_ = 0	
 			
-			if sum(coords) < 0:
-				sum_ = -sum(coords)
-			else:
-				sum_ = sum(coords)
-			
-			if sum_ > 0 and not self.pause:
-				flag = True
-			
-				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(int(round((time.time()-start)*1000)),6),'temptime.txt','append')
+			if coordinates['x_1'] != '0' and coordinates['x_2'] != '0' and coordinates['y_1'] != '0' and coordinates['y_2'] != '0' and not self.pause:
 				
-				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[0],5),'tempdata.txt','append')
-				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[1],5),'tempdata.txt','append')			
-				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[2],5),'tempdata.txt','append')		
-				utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[3],5),'tempdata.txt','append')
+				if not flag:
+					coordinates['block_time'] = time.ctime()
+					flag = True
+				
+				coordinates['time'] = int(round((time.time()-start)*1000))
+				utilities.FileHandler.saveToFile(coordinates,'tempdata.txt','append')
+					
+				#Portablize this
+				cmd = open('/home/kristian/master_thesis/FlyTracker/data/datapipe','w')
+				cmd.write(json.dumps(coordinates))
+				cmd.close() 					
+								
+				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(int(round((time.time()-start)*1000)),6),'temptime.txt','append')
+				
+				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[0],5),'tempdata.txt','append')
+				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[1],5),'tempdata.txt','append')			
+				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[2],5),'tempdata.txt','append')		
+				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[3],5),'tempdata.txt','append')	
+
+				coordinates['x_1'] = '0'
+				coordinates['x_2'] = '0'
+				coordinates['y_1'] = '0'
+				coordinates['y_2'] = '0'
 
 			if self.pause and flag:
-				utilities.FileHandler.saveToFile('*','tempdata.txt','append')
-				utilities.FileHandler.saveToFile('*','temptime.txt','append')
+				utilities.FileHandler.saveToFile('pause','tempdata.txt','append')
 				flag = False
 
 			coords = [0,0,0,0]		
@@ -136,12 +148,16 @@ class SensorMouse(AbstractMouse):
 			dx = utilities.Utilities.toSigned(dx)
 			dy = utilities.Utilities.toSigned(dy)
 					
-			if self.id == 'sensor1':			
-				coords[0] = dx
-				coords[1] = dy
-			elif self.id == 'sensor2':			
-				coords[2] = dx
-				coords[3] = dy
+			if self.id == 'sensor1':
+				coordinates["x_1"] = dx
+				coordinates["y_1"] = dy	
+				#coords[0] = dx
+				#coords[1] = dy
+			elif self.id == 'sensor2':		
+				coordinates["x_2"] = dx
+				coordinates["y_2"] = dy
+				#coords[2] = dx
+				#coords[3] = dy
 
 #Class for handling the network connection
 class socketHandler(threading.Thread):
@@ -262,4 +278,8 @@ if __name__ == '__main__':
 
 	#Launch provided function label
 	functions[args['function']](args)
+
+	cmd = open('/home/kristian/master_thesis/FlyTracker/data/datapipe','w')
+	cmd.write('kill')
+	cmd.close()
 	
