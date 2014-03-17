@@ -140,7 +140,8 @@ function run_btn_Callback(hObject, eventdata, handles)
                 arg = ['mkfifo ',getpath('pipe','data')];
                 system(arg); %Create named pipe if not existing
             end
-
+            
+            
             set(handles.run_btn,'String','Running..');
             drawnow;
             port =  num2str(config.port);
@@ -220,11 +221,12 @@ function stop_btn_Callback(hObject, eventdata, handles)
 
     set(handles.run_btn,'String','Run');
     drawnow;
-       
+    output   
     if ~strcmp(output,'')
         %saveAndDisplayData(handles,output,filename);
         readData(handles,filename);   
     else
+        readData(handles,filename);
         msgbox('No data was recorded!','Failure');
     end
     

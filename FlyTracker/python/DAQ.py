@@ -10,9 +10,9 @@ import json
 
 
 #Global variables
-coords = [0,0,0,0]
-coordinates = {"x_1":"0","y_1":"0","x_2":"0","y_2":"0","time":"0","block_time":"0"}
-
+coords = []
+coordinates = {"x_1":0,"y_1":0,"x_2":0,"y_2":0,"t":0}
+runner = True
 mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
 defaultPort = 3000 #Default port value for the trigger server to be listening on
 pipe = utilities.Utilities.getPath('pipe')
@@ -47,11 +47,12 @@ class MouseHandler(threading.Thread):
 		try:	
 			#Daemon threads are all closed (not clean close) when all non-daemon threads are terminated
 			self.s1.setDaemon(True)
-			self.s2.setDaemon(True)	
-			
+			self.s2.setDaemon(True)
+
 			#Run the threads			
 			self.s1.start()
 			self.s2.start()
+			#self.writer.start()
 		
 		except Exception:
 			utilities.FileHandler.logException(traceback.format_exc())
@@ -61,19 +62,17 @@ class MouseHandler(threading.Thread):
 		flag = True #flag for determining whether blockmarker has been added or not
 		while self.run_:					
 			
-			if coordinates['x_1'] != '0' and coordinates['x_2'] != '0' and coordinates['y_1'] != '0' and coordinates['y_2'] != '0' and not self.pause:
+			if coordinates['x_1'] != 0 or coordinates['x_2'] != 0 or coordinates['y_1'] != 0 or coordinates['y_2'] != 0 and not self.pause:
 				
 				if not flag:
-					coordinates['block_time'] = time.ctime()
+					#coordinates['block_time'] = time.ctime()
 					flag = True
 				
-				coordinates['time'] = int(round((time.time()-start)*1000))
+				coordinates['t'] = int(round((time.time()-start)*1000))
+				#coords.append(coordinates)				
+				
 				utilities.FileHandler.saveToFile(coordinates,'tempdata.txt','append')
 					
-				#Portablize this
-				cmd = open('/home/kristian/master_thesis/FlyTracker/data/datapipe','w')
-				cmd.write(json.dumps(coordinates))
-				cmd.close() 					
 								
 				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(int(round((time.time()-start)*1000)),6),'temptime.txt','append')
 				
@@ -82,16 +81,16 @@ class MouseHandler(threading.Thread):
 				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[2],5),'tempdata.txt','append')		
 				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[3],5),'tempdata.txt','append')	
 
-				coordinates['x_1'] = '0'
-				coordinates['x_2'] = '0'
-				coordinates['y_1'] = '0'
-				coordinates['y_2'] = '0'
+				coordinates['x_1'] = 0
+				coordinates['x_2'] = 0
+				coordinates['y_1'] = 0
+				coordinates['y_2'] = 0
 
 			if self.pause and flag:
 				utilities.FileHandler.saveToFile('pause','tempdata.txt','append')
 				flag = False
 
-			coords = [0,0,0,0]		
+			#coords = [0,0,0,0]		
 		
 	def addMouse(self,mouse):
 		self.sensors.append(mouse)
@@ -158,6 +157,7 @@ class SensorMouse(AbstractMouse):
 				coordinates["y_2"] = dy
 				#coords[2] = dx
 				#coords[3] = dy
+			print coordinates
 
 #Class for handling the network connection
 class socketHandler(threading.Thread):
@@ -217,7 +217,6 @@ class socketHandler(threading.Thread):
 				connection.close()                # Close the connection
 			except UnboundLocalError:
 				pass
-				
 
 
 #Listens on socket for signal from trigger client. Can start, pause and stop readings
@@ -242,17 +241,17 @@ def runWithTimer(args):
 	time.sleep(int(args['time'])/1000)
 
 	handler.stop()	
+	utilities.FileHandler.saveToFile('kill','tempdata.txt','append')
 
 #Run DAQ without trigger, uses named pipe to communicate with matlab
 def runWithoutTrigger(args):
-	global pipe
+	global pipe, coords
 
 	handler = MouseHandler()
 	handler.start()
 
 	#Reads from pipe as soon as anything is written it stops
 	open(pipe).read().strip()
-
 	handler.stop()
 	
 
@@ -270,8 +269,7 @@ def parseArgs(args):
 if __name__ == '__main__':
 	#Precondition:
 	#System args must be in the form: 'function' 'parameter1' 'value1' 'parameter2' 'value2'...	
-
-
+	
 	#Function map 
 	functions = {'network':runWithNetworkTrigger, 'notrigger':runWithoutTrigger, 'timer':runWithTimer}	
 	args = parseArgs(sys.argv) #sys.argv are arguments provided when calling function from commandline
@@ -279,7 +277,4 @@ if __name__ == '__main__':
 	#Launch provided function label
 	functions[args['function']](args)
 
-	cmd = open('/home/kristian/master_thesis/FlyTracker/data/datapipe','w')
-	cmd.write('kill')
-	cmd.close()
 	

@@ -29,7 +29,7 @@ class FileHandler:
 			
 		try:
 			f = open(path_data+fileName,e)
-			output = json.dumps(toSave)
+			output = json.dumps(toSave)+'\n'
 			f.write(output)
 	
 		except IOError:

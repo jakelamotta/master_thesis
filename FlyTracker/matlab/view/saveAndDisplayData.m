@@ -3,7 +3,7 @@ function [] = saveAndDisplayData(handles,output, filename)
 
 tic;
 [data,fulldata] = calcdata(output);
-toc
+toc;
 save(filename,'data');
 
 %Plot for forward velocity

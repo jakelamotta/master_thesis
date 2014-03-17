@@ -37,7 +37,7 @@ for k=1:size_(2)
         x2 = temp.x_2;
         y1 = temp.y_1;
         y2 = temp.y_2;
-        time = temp.time;
+        time = temp.t;
 
         w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
 
