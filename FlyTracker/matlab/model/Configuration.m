@@ -13,6 +13,7 @@ classdef Configuration < handle
         savepath;
         pwd;
         alpha_;
+        theta; %In radians
     end
     
     methods (Access = 'public')
@@ -23,10 +24,11 @@ classdef Configuration < handle
             this.port = 4444;
             this.trigger = 'no';
             this.runnable = true;
-            time = 3000;
+            this.time = 3000;
             this.savepath = getpath('','data');
             this.pwd = '';
             this.alpha_ = 1;
+            this.theta = pi/2;
         end   
         
         %%%%%%%%%%SETTERS%%%%%%%%%%%%%%%%
@@ -70,6 +72,10 @@ classdef Configuration < handle
         
         function setAlpha(this,a)
             this.alpha_ = a;
+        end
+        
+        function setTheta(this,t)
+            this.theta = t;
         end
     end
     

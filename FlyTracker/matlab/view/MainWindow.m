@@ -129,36 +129,40 @@ function run_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to run_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    config = getappdata(0,'config')
+    config = getappdata(0,'config');
+    
     if config.runnable
         if ~strcmp(config.pwd,'') && length(getappdata(0,'pass')) == 0
             setappdata(0,'pass',config.pwd);
         elseif strcmp(config.pwd,'') && length(getappdata(0,'pass')) == 0 
             PwQuery;
-        end 
-            if ~exist(getpath('pipe','data'),'file')
-                arg = ['mkfifo ',getpath('pipe','data')];
-                system(arg); %Create named pipe if not existing
+        end
+        
+            if exist(getpath('pipe','data'),'file')
+                delete(getpath('pipe','data'));
             end
             
+            arg = ['mkfifo ',getpath('pipe','data')];
+            system(arg); %Create named pipe if not existing
             
             set(handles.run_btn,'String','Running..');
             drawnow;
             port =  num2str(config.port);
-
+            c = clock();
+            filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
+            
             %Running with network trigger
             if get(handles.network_rdbtn,'value')
                 arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "network" "port"',' ',port,' &'];
                 system(arg);
-
+                
+                readData(handles,filename);
+                
             %Running with timer
             elseif get(handles.timer_rdbtn,'value')
-                c = clock;
-                filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
-
                 input = get(handles.timer_edt,'String');
+                
                 if isstrprop(input,'digit')
-
                     time = num2str(input);
                     arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "timer" "time"',' ',time,' &'];
                     system(arg);
@@ -167,23 +171,16 @@ function run_btn_Callback(hObject, eventdata, handles)
                     errordlg('Timer input must be an integer, please try again');
                 end
 
-                %output = opentempdata();
                 readData(handles,filename);
 
                 set(handles.run_btn,'String','Run');
                 drawnow;
 
-%                 if ~strcmp(output,'')
-%                     %saveAndDisplayData(handles,output,filename);
-%                     
-%                 else
-%                     msgbox('No data was recorded!','Failure');
-%                 end
-
             %Running with no trigger
             elseif get(handles.no_rdbtn,'value')            
                 arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "notrigger" &'];
-                system(arg);            
+                system(arg);
+                readData(handles,filename);
             end
             
             
@@ -202,35 +199,20 @@ function stop_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to stop_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    config = getappdata(0,'config')
-    
-    %Save data to file with current date and time as filename
-    c = clock;
-    filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
+    config = getappdata(0,'config');
+    setappdata(0,'running', false);
     
     %Code for communicating with python process
     fid = fopen(getpath('pipe','data'),'w');
     fwrite(fid,'quit');      %Write quit command to the pipe
     fclose(fid);             %Close pipe
-            
+             
     %Clean up, deleting the pipe
-    arg = ['rm -f ',getpath('pipe','data')]
+    arg = ['rm -f ',getpath('pipe','data')];
     system(arg);
     
-    output = opentempdata();
-
     set(handles.run_btn,'String','Run');
     drawnow;
-    output   
-    if ~strcmp(output,'')
-        %saveAndDisplayData(handles,output,filename);
-        readData(handles,filename);   
-    else
-        readData(handles,filename);
-        msgbox('No data was recorded!','Failure');
-    end
-    
-
 
 % --- Executes on key press with focus on stop_btn and none of its controls.
 function stop_btn_KeyPressFcn(hObject, eventdata, handles)
@@ -241,32 +223,19 @@ function stop_btn_KeyPressFcn(hObject, eventdata, handles)
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
     config = getappdata(0,'config')
-    
-    %Save data to file with current date and time as filename
-    c = clock;
-    filename = strcat(config.savepath,'/',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
-    
+    setappdata(0,'running', false);
+        
     %Code for communicating with python process
     fid = fopen(getpath('pipe','data'),'w');
     fwrite(fid,'quit');      %Write quit command to the pipe
     fclose(fid);             %Close pipe
             
     %Clean up, deleting the pipe
-    arg = ['rm -f ',getpath('pipe','data')]
+    arg = ['rm -f ',getpath('pipe','data')];
     system(arg);
     
-    output = opentempdata();
-
     set(handles.run_btn,'String','Run');
-    drawnow;
-       
-    if ~strcmp(output,'')
-        %saveAndDisplayData(handles,output,filename);
-        readData(handles,filename);   
-            
-    else
-        msgbox('No data was recorded!','Failure');
-    end
+    drawnow;   
 
 % --------------------------------------------------------------------
 function manual_menu_item_Callback(hObject, eventdata, handles)

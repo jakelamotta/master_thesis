@@ -7,8 +7,6 @@ import time
 import os
 import json
 				
-
-
 #Global variables
 coords = []
 coordinates = {"x_1":0,"y_1":0,"x_2":0,"y_2":0,"t":0}
@@ -52,8 +50,7 @@ class MouseHandler(threading.Thread):
 			#Run the threads			
 			self.s1.start()
 			self.s2.start()
-			#self.writer.start()
-		
+			
 		except Exception:
 			utilities.FileHandler.logException(traceback.format_exc())
 		
@@ -65,22 +62,12 @@ class MouseHandler(threading.Thread):
 			if coordinates['x_1'] != 0 or coordinates['x_2'] != 0 or coordinates['y_1'] != 0 or coordinates['y_2'] != 0 and not self.pause:
 				
 				if not flag:
-					#coordinates['block_time'] = time.ctime()
 					flag = True
 				
 				coordinates['t'] = int(round((time.time()-start)*1000))
-				#coords.append(coordinates)				
 				
 				utilities.FileHandler.saveToFile(coordinates,'tempdata.txt','append')
 					
-								
-				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(int(round((time.time()-start)*1000)),6),'temptime.txt','append')
-				
-				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[0],5),'tempdata.txt','append')
-				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[1],5),'tempdata.txt','append')			
-				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[2],5),'tempdata.txt','append')		
-				#utilities.FileHandler.saveToFile(utilities.Utilities.padNumber(coords[3],5),'tempdata.txt','append')	
-
 				coordinates['x_1'] = 0
 				coordinates['x_2'] = 0
 				coordinates['y_1'] = 0
@@ -185,9 +172,8 @@ class socketHandler(threading.Thread):
 			msg = connection.recv(1)
 		
 			if msg == 's':
-				print 's'
 				self.handler.start()
-			
+				utilities.FileHandler.saveToFile(time.ctime(),'blocktime.txt','append')
 			else:
 				print 'Not correct msg ',msg
 		
@@ -201,10 +187,12 @@ class socketHandler(threading.Thread):
 				trigger = connection.recv(1)
 
 				print 'Message rec: ',trigger
+
 				if trigger == 'p':
 					self.handler.pause = True
 				elif trigger == 's':
 					self.handler.pause = False
+					utilities.FileHandler.saveToFile(time.ctime(),'blocktime.txt','append')		
 		
 
 		except Exception:
@@ -272,9 +260,8 @@ if __name__ == '__main__':
 	
 	#Function map 
 	functions = {'network':runWithNetworkTrigger, 'notrigger':runWithoutTrigger, 'timer':runWithTimer}	
+	
 	args = parseArgs(sys.argv) #sys.argv are arguments provided when calling function from commandline
 
 	#Launch provided function label
 	functions[args['function']](args)
-
-	
