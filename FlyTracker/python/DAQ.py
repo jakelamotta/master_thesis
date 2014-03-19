@@ -64,7 +64,7 @@ class MouseHandler(threading.Thread):
 				if not flag:
 					flag = True
 				
-				coordinates['t'] = int(round((time.time()-start)*1000))
+				coordinates['t'] = int(round((time.time()-start)*10000))
 				
 				utilities.FileHandler.saveToFile(coordinates,'tempdata.txt','append')
 					
@@ -136,16 +136,11 @@ class SensorMouse(AbstractMouse):
 					
 			if self.id == 'sensor1':
 				coordinates["x_1"] = dx
-				coordinates["y_1"] = dy	
-				#coords[0] = dx
-				#coords[1] = dy
+				coordinates["y_1"] = dy
+	
 			elif self.id == 'sensor2':		
 				coordinates["x_2"] = dx
 				coordinates["y_2"] = dy
-				#coords[2] = dx
-				#coords[3] = dy
-			print coordinates
-
 #Class for handling the network connection
 class socketHandler(threading.Thread):
 
@@ -224,6 +219,8 @@ def runWithNetworkTrigger(args):
 #Paramter time should be in ms
 def runWithTimer(args):
 	handler = MouseHandler()
+
+	utilities.FileHandler.saveToFile(time.ctime(),'blocktime.txt','append')
 	handler.start()
 	
 	time.sleep(int(args['time'])/1000)
@@ -236,6 +233,7 @@ def runWithoutTrigger(args):
 	global pipe, coords
 
 	handler = MouseHandler()
+	utilities.FileHandler.saveToFile(time.ctime(),'blocktime.txt','append')
 	handler.start()
 
 	#Reads from pipe as soon as anything is written it stops

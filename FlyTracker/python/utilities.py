@@ -8,10 +8,7 @@ path = '/home/kristian/master_thesis/' #set to location of FlyTracker folder
 ####EDIT STOP###########
 
 path_pipe = path+'FlyTracker/data/pipe'
-path_data = path+'FlyTracker/data/'#'/home/kristian/master_thesis/FlyTracker/data/'
-
-
-
+path_data = path+'FlyTracker/data/'
 
 #Class for file input/output handling
 class FileHandler:

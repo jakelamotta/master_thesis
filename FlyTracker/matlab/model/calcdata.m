@@ -9,53 +9,95 @@ function [ data,concatdata ] = calcdata(output)
 %Blocks separated by "*"
 %*******************************************************
 
-blocks = parseInput(output);
-size_ = size(blocks);
+% blocks = parseInput(output);
+% size_ = size(blocks);
 
-for k=1:size_(2)
-    output = blocks{1,k};
-    starts = strfind(output,'{');
-    ends = strfind(output,'}');
-    len = length(starts);
+% for k=1:1
+%     %output = blocks{1,k};
+%     starts = strfind(output,'{');
+%     ends = strfind(output,'}');
+%     len = length(starts);
+% 
+%     %dynamic values later
+%     alpha_ = .0185;
+%     omega = 0;%pi/4;
+%     r = 25;
+% 
+%     side = zeros(1,len);
+%     forward = zeros(1,len);
+%     yaw = zeros(1,len);
+%     times = zeros(1,len);
+% 
+%     data = cell(4,1);
+% 
+% 
+%     for i=1:len
+%         temp = JSON.parse(output(starts(i):ends(i)));
+%         x1 = temp.x_1;
+%         x2 = temp.x_2;
+%         y1 = temp.y_1;
+%         y2 = temp.y_2;
+%         time = temp.t;
+% 
+%         w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
+% 
+%         w_mz = alpha_*(x1+x2)/(2*r);
+% 
+%         side(i) = w_m(1);
+%         forward(i) = w_m(2);
+%         yaw(i) = w_mz;%*180/pi;    
+%         times(i) = time;
+%     end
+%     
+% end
+%     data{1,k} = side;
+%     data{2,k} = forward;
+%     data{3,k} = yaw;
+%     data{4,k} = times;
+%     concatdata = data;
+%     
+%     concatdata = concatBlocks(data);
 
-    %dynamic values later
-    alpha_ = .0185;
-    omega = 0;%pi/4;
-    r = 25;
+starts = strfind(output,'{');
+ends = strfind(output,'}');
+len = length(starts);
 
-    side = zeros(1,len);
-    forward = zeros(1,len);
-    yaw = zeros(1,len);
-    times = zeros(1,len);
+%dynamic values later
+alpha_ = .0175;
+omega = 0;%pi/4;
+r = 25;
 
-    data = cell(4,1);
+side = zeros(1,len);
+forward = zeros(1,len);
+yaw = zeros(1,len);
+times = zeros(1,len);
+
+data = cell(4,1);
 
 
-    for i=1:len
-        temp = JSON.parse(output(starts(i):ends(i)));
-        x1 = temp.x_1;
-        x2 = temp.x_2;
-        y1 = temp.y_1;
-        y2 = temp.y_2;
-        time = temp.t;
+for i=1:len
+    temp = JSON.parse(output(starts(i):ends(i)));
+    x1 = temp.x_1;
+    x2 = temp.x_2;
+    y1 = temp.y_1;
+    y2 = temp.y_2;
+    time = temp.t;
 
-        w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
+    w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
 
-        w_mz = alpha_*(x1+x2)/(2*r);
+    w_mz = alpha_*(x1*.1+x2*.1)/(2*r);
 
-        side(i) = w_m(1);
-        forward(i) = w_m(2);
-        yaw(i) = w_mz;%*180/pi;    
-        times(i) = time;
-    end
-    
+    side(i) = w_m(1);
+    forward(i) = w_m(2);
+    yaw(i) = w_mz;%*180/pi;    
+    times(i) = time;
 end
-    data{1,k} = side;
-    data{2,k} = forward;
-    data{3,k} = yaw;
-    data{4,k} = times;
+    data{1,1} = side;
+    data{2,1} = forward;
+    data{3,1} = yaw;
+    data{4,1} = times;
+    concatdata = data;
     
-    concatdata = concatBlocks(data);
 end
 
 %Function that concatenate all blocks in one data cell for each variable

@@ -5,8 +5,8 @@ function [x,y] = calc2DPath(data)
 
 len = length(data{3,1});
 
-forward = data{1,1};
-side = data{2,1};
+forward = .1.*data{1,1};
+side = .1.*data{2,1};
 yaw = cumsum(data{3,1});
 
 x = zeros(1,len);

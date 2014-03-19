@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 06-Mar-2014 15:35:51
+% Last Modified by GUIDE v2.5 19-Mar-2014 15:37:16
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -99,6 +99,19 @@ if exist(getpath('tempdata.txt','data'))
         %delete(getpath('temptime.txt','data'));
     end
 end
+
+title(handles.axes1,'Forward position');
+xlabel(handles.axes1,'Time (ms)');
+ylabel(handles.axes1,'Position (mm)');
+
+title(handles.axes2,'Sideway position');
+xlabel(handles.axes2,'Time (ms)');
+ylabel(handles.axes2,'Position (mm)');
+
+title(handles.axes3,'Angle position (yaw)');
+xlabel(handles.axes3,'Time (ms)');
+ylabel(handles.axes3,'Position (degrees)');
+
 
 % --- Outputs from this function are returned to the command line.
 function varargout = MainWindow_OutputFcn(hObject, eventdata, handles) 
@@ -507,6 +520,104 @@ function popupmenu4_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function popupmenu4_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to popupmenu4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit2_Callback(hObject, eventdata, handles)
+% hObject    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit2 as text
+%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --------------------------------------------------------------------
+function view_Callback(hObject, eventdata, handles)
+% hObject    handle to view (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --------------------------------------------------------------------
+function select_Callback(hObject, eventdata, handles)
+% hObject    handle to select (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on selection change in pop.
+function pop_Callback(hObject, eventdata, handles)
+% hObject    handle to pop (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns pop contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from pop
+    
+    fulldata = getappdata(0,'data');
+    block = get(handles.pop,'Value');
+    %displaydata(block);
+    
+    %Plot for forward velocity
+    plot(handles.axes1,.1.*fulldata{4,block},cumsum(fulldata{1,block}));
+    title_ = strcat('Forward position');
+    title(handles.axes1,title_);
+    xlabel(handles.axes1,'Time (ms)');
+    ylabel(handles.axes1,'Position (mm)');
+
+    %Plot for sideway velocity
+    plot(handles.axes2,.1.*fulldata{4,block},cumsum(fulldata{2,block}));
+    title_ = strcat('Sideway position');
+    title(handles.axes2,title_);
+    xlabel(handles.axes2,'Time (ms)');
+    ylabel(handles.axes2,'Position (mm)');
+    
+    %Plot for yaw velocity
+    plot(handles.axes3,.1.*fulldata{4,block},cumsum((180/pi).*fulldata{3,block}));
+    title_ = strcat('Angle position');
+    title(handles.axes3,title_);
+    xlabel(handles.axes3,'Time (ms)');
+    ylabel(handles.axes3,'Position (degrees)');
+    
+    [x,y] = calc2DPath(fulldata);
+    
+    %Plot for yaw velocity
+    plot(handles.axes4,x,y);
+    title(handles.axes4,'2D-map');
+    xlabel(handles.axes4,'Forward position (mm)');
+    ylabel(handles.axes4,'Sideway position (mm)');
+
+    min_ = min(min(y,x));
+    max_ = max(max(y,x));
+
+    axis([min_ max_ min_ max_]);
+    axis square;
+
+% --- Executes during object creation, after setting all properties.
+function pop_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to pop (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
