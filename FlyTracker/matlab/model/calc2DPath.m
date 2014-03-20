@@ -1,13 +1,13 @@
-function [x,y] = calc2DPath(data)
+function [x,y] = calc2DPath(data,block)
 %CALC2DPATH Function that calculates a 2D path given delta coordinates for
 %the fly
 %   Detailed explanatwion goes here
 
-len = length(data{3,1});
+len = length(data{3,block});
 
-forward = .1.*data{1,1};
-side = .1.*data{2,1};
-yaw = cumsum(data{3,1});
+forward = .1.*data{1,block};
+side = .1.*data{2,block};
+yaw = cumsum(data{3,block});
 
 x = zeros(1,len);
 y = zeros(1,len);

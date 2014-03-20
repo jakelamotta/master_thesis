@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 19-Mar-2014 15:37:16
+% Last Modified by GUIDE v2.5 20-Mar-2014 12:04:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -76,6 +76,17 @@ else
     set(handles.no_rdbtn,'value',1);
 end
 
+if strcmp(config.plotting,'cumsum')
+    set(handles.cumpos,'Checked','on');
+    %set(handles.network_menu_item,'Checked','On');
+
+elseif strcmp(config.plotting,'delta')
+    set(handles.dp_menu,'Checked','on');
+    %set(handles.timer_menu_item,'Checked','On');
+else
+    set(handles.vel_meun,'Checked','on');
+end
+
 %set(handles.popaxes1, 'String',enumeration('Plots'));
 
 %If tempdata still exists it means that the last run wasnt finished
@@ -89,14 +100,15 @@ if exist(getpath('tempdata.txt','data'))
         if ~strcmp(output,'')
             c = clock;
             filename = strcat(config.savepath,'/recovereddata_',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
-            saveAndDisplayData(handles,output,filename);
+            %displaydata(handles,output,filename);
+            %save(filename,
         else
             msgbox('No data was recorded!','Failure');
         end
     else
         %Delete temp data files
         delete(getpath('tempdata.txt','data'));
-        %delete(getpath('temptime.txt','data'));
+        delete(getpath('blocktime.txt','data'));
     end
 end
 
@@ -420,7 +432,15 @@ function figure1_DeleteFcn(hObject, eventdata, handles)
         else
             config.setNetworkTrigger('no');
         end   
-
+        
+        if strcmp(get(handles.dp_menu,'Checked'),'on')
+            config.setPlotting('delta');
+        elseif strcmp(get(handles.cumpos,'Checked'),'on')
+            config.setPlotting('cumsum');
+        elseif strcmp(get(handles.vel_menu,'Checked'),'on')     
+            config.setPlotting('vel');
+        end
+        
         save(getpath('config.mat','data'), 'config');
     end
 
@@ -578,42 +598,9 @@ function pop_Callback(hObject, eventdata, handles)
     
     fulldata = getappdata(0,'data');
     block = get(handles.pop,'Value');
-    %displaydata(block);
+    size_ = size(fulldata);
+    displaydata(fulldata,handles,size_,block);
     
-    %Plot for forward velocity
-    plot(handles.axes1,.1.*fulldata{4,block},cumsum(fulldata{1,block}));
-    title_ = strcat('Forward position');
-    title(handles.axes1,title_);
-    xlabel(handles.axes1,'Time (ms)');
-    ylabel(handles.axes1,'Position (mm)');
-
-    %Plot for sideway velocity
-    plot(handles.axes2,.1.*fulldata{4,block},cumsum(fulldata{2,block}));
-    title_ = strcat('Sideway position');
-    title(handles.axes2,title_);
-    xlabel(handles.axes2,'Time (ms)');
-    ylabel(handles.axes2,'Position (mm)');
-    
-    %Plot for yaw velocity
-    plot(handles.axes3,.1.*fulldata{4,block},cumsum((180/pi).*fulldata{3,block}));
-    title_ = strcat('Angle position');
-    title(handles.axes3,title_);
-    xlabel(handles.axes3,'Time (ms)');
-    ylabel(handles.axes3,'Position (degrees)');
-    
-    [x,y] = calc2DPath(fulldata);
-    
-    %Plot for yaw velocity
-    plot(handles.axes4,x,y);
-    title(handles.axes4,'2D-map');
-    xlabel(handles.axes4,'Forward position (mm)');
-    ylabel(handles.axes4,'Sideway position (mm)');
-
-    min_ = min(min(y,x));
-    max_ = max(max(y,x));
-
-    axis([min_ max_ min_ max_]);
-    axis square;
 
 % --- Executes during object creation, after setting all properties.
 function pop_CreateFcn(hObject, eventdata, handles)
@@ -626,3 +613,38 @@ function pop_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+% --------------------------------------------------------------------
+function Untitled_4_Callback(hObject, eventdata, handles)
+% hObject    handle to Untitled_4 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    
+% --------------------------------------------------------------------
+function dp_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to dp_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    set(handles.dp_menu,'Checked','on');
+    set(handles.cumpos,'Checked','off');
+    set(handles.vel_menu,'Checked','off');
+
+% --------------------------------------------------------------------
+function cumpos_Callback(hObject, eventdata, handles)
+% hObject    handle to cumpos (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    set(handles.dp_menu,'Checked','off');
+    set(handles.cumpos,'Checked','on');
+    set(handles.vel_menu,'Checked','off');
+
+% --------------------------------------------------------------------
+function vel_menu_Callback(hObject, eventdata, handles)
+% hObject    handle to vel_menu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    set(handles.dp_menu,'Checked','off');
+    set(handles.cumpos,'Checked','off');
+    set(handles.vel_menu,'Checked','on');
+
+            

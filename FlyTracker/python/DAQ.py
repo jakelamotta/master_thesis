@@ -59,7 +59,7 @@ class MouseHandler(threading.Thread):
 		flag = True #flag for determining whether blockmarker has been added or not
 		while self.run_:					
 			
-			if coordinates['x_1'] != 0 or coordinates['x_2'] != 0 or coordinates['y_1'] != 0 or coordinates['y_2'] != 0 and not self.pause:
+			if (coordinates['x_1'] != 0 or coordinates['x_2'] != 0 or coordinates['y_1'] != 0 or coordinates['y_2'] != 0) and not self.pause:
 				
 				if not flag:
 					flag = True
@@ -74,6 +74,7 @@ class MouseHandler(threading.Thread):
 				coordinates['y_2'] = 0
 
 			if self.pause and flag:
+				print 'savin pause'
 				utilities.FileHandler.saveToFile('pause','tempdata.txt','append')
 				flag = False
 
@@ -128,19 +129,24 @@ class SensorMouse(AbstractMouse):
 	def run(self):
 		global coords
 		
-		#Reads mouse delta coordinates and write them to the global coord array
-		while self.handler.run_:
-			status, dx, dy = tuple(ord(c) for c in self.mouse.read(3))
-			dx = utilities.Utilities.toSigned(dx)
-			dy = utilities.Utilities.toSigned(dy)
+		try:
+			#Reads mouse delta coordinates and write them to the global coord array
+			while self.handler.run_:
+				status, dx, dy = tuple(ord(c) for c in self.mouse.read(3))
+				dx = utilities.Utilities.toSigned(dx)
+				dy = utilities.Utilities.toSigned(dy)
 					
-			if self.id == 'sensor1':
-				coordinates["x_1"] = dx
-				coordinates["y_1"] = dy
+				if self.id == 'sensor1':
+					coordinates["x_1"] = dx
+					coordinates["y_1"] = dy
 	
-			elif self.id == 'sensor2':		
-				coordinates["x_2"] = dx
-				coordinates["y_2"] = dy
+				elif self.id == 'sensor2':		
+					coordinates["x_2"] = dx
+					coordinates["y_2"] = dy
+
+		except Exception:
+			utilities.FileHandler.logException(traceback.format_exc())			
+			
 #Class for handling the network connection
 class socketHandler(threading.Thread):
 
@@ -152,14 +158,14 @@ class socketHandler(threading.Thread):
 		super(socketHandler,self).__init__()
 
 	def run(self):
-
+		
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			
 			s.bind(('',self.port)) #Using '' is prefferable compared to IP-address
 			s.listen(1)
 			s.settimeout(120)	
-		
+			
 			print 'connection is running on localhost'
 			connection, addr = s.accept()     # Establish connection with client.
 			print 'Connection accepted from ',addr
@@ -194,8 +200,8 @@ class socketHandler(threading.Thread):
 			print traceback.format_exc()
 			utilities.FileHandler.logException(traceback.format_exc())	
 		finally: 
-			s.shutdown(socket.SHUT_RDWR)
-
+			s.shutdown(socket.SHUT_RDWR)	
+			
 			try:
 				connection.close()                # Close the connection
 			except UnboundLocalError:
@@ -207,6 +213,7 @@ def runWithNetworkTrigger(args):
 	port = int(args['port'])
 	
 	handler = socketHandler(port)
+	
 	handler.setDaemon(True)
 	handler.start()
 
@@ -263,3 +270,4 @@ if __name__ == '__main__':
 
 	#Launch provided function label
 	functions[args['function']](args)
+	print 'quit'

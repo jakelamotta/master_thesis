@@ -14,6 +14,7 @@ classdef Configuration < handle
         pwd;
         alpha_;
         theta; %In radians
+        plotting;
     end
     
     methods (Access = 'public')
@@ -29,6 +30,7 @@ classdef Configuration < handle
             this.pwd = '';
             this.alpha_ = 1;
             this.theta = pi/2;
+            this.plotting = 'cumsum';
         end   
         
         %%%%%%%%%%SETTERS%%%%%%%%%%%%%%%%
@@ -61,6 +63,10 @@ classdef Configuration < handle
             
         end
         
+        function setPlotting(this,p)
+            
+            this.plotting = p;
+        end
         function setPort(this,p)
             %Validates portnumber before setting it
             if str2num(p) > 1024 && str2num(p) < 65535    
