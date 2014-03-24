@@ -51,7 +51,7 @@ class FileHandler:
 	
 	@staticmethod
 	def logException(exception_message):
-		output = exception_message+' '+time.asctime(time.localtime())+'\n'
+		output = exception_message+' '+time.asctime(time.localtime())
 		FileHandler.saveToFile(output,'log.txt','a')
 
 #General utility class with functions for data handling

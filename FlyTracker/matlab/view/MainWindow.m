@@ -67,27 +67,29 @@ set(handles.timer_edt,'String',config.time);
 
 if strcmp(config.trigger,'network')
     set(handles.network_rdbtn,'value',1);
-    %set(handles.network_menu_item,'Checked','On');
 
 elseif strcmp(config.trigger,'timer')
     set(handles.timer_rdbtn,'value',1);
-    %set(handles.timer_menu_item,'Checked','On');
 else
     set(handles.no_rdbtn,'value',1);
 end
 
 if strcmp(config.plotting,'cumsum')
     set(handles.cumpos,'Checked','on');
-    %set(handles.network_menu_item,'Checked','On');
-
+    titles = {'Forward position','Sideway position','Yaw position'};
+    y_axis = {'Position (mm)','Position (mm)','Position (degrees)'};
+    setplotdescription(handles,titles,y_axis);
 elseif strcmp(config.plotting,'delta')
     set(handles.dp_menu,'Checked','on');
-    %set(handles.timer_menu_item,'Checked','On');
+    titles = {'Forward position','Sideway position','Yaw position'};
+    y_axis = {'Position (mm)','Position (mm)','Position (degrees)'};
+    setplotdescription(handles,titles,y_axis);
 else
-    set(handles.vel_meun,'Checked','on');
+    set(handles.vel_menu,'Checked','on');
+    titles = {'Forward velocity','Sideway velocity','Yaw velocity'};
+    y_axis = {'Velocity (m/s)','Velocity (m/s)','Velocity (degrees/s)'};
+    setplotdescription(handles,titles,y_axis);
 end
-
-%set(handles.popaxes1, 'String',enumeration('Plots'));
 
 %If tempdata still exists it means that the last run wasnt finished
 %properly, the data is still stored though. 
@@ -111,19 +113,6 @@ if exist(getpath('tempdata.txt','data'))
         delete(getpath('blocktime.txt','data'));
     end
 end
-
-title(handles.axes1,'Forward position');
-xlabel(handles.axes1,'Time (ms)');
-ylabel(handles.axes1,'Position (mm)');
-
-title(handles.axes2,'Sideway position');
-xlabel(handles.axes2,'Time (ms)');
-ylabel(handles.axes2,'Position (mm)');
-
-title(handles.axes3,'Angle position (yaw)');
-xlabel(handles.axes3,'Time (ms)');
-ylabel(handles.axes3,'Position (degrees)');
-
 
 % --- Outputs from this function are returned to the command line.
 function varargout = MainWindow_OutputFcn(hObject, eventdata, handles) 
@@ -181,7 +170,7 @@ function run_btn_Callback(hObject, eventdata, handles)
                 arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "network" "port"',' ',port,' &'];
                 system(arg);
                 
-                readData(handles,filename);
+                readData(handles,filename,'');
                 
             %Running with timer
             elseif get(handles.timer_rdbtn,'value')
@@ -196,7 +185,7 @@ function run_btn_Callback(hObject, eventdata, handles)
                     errordlg('Timer input must be an integer, please try again');
                 end
 
-                readData(handles,filename);
+                readData(handles,filename,'');
 
                 set(handles.run_btn,'String','Run');
                 drawnow;
@@ -205,7 +194,7 @@ function run_btn_Callback(hObject, eventdata, handles)
             elseif get(handles.no_rdbtn,'value')            
                 arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "notrigger" &'];
                 system(arg);
-                readData(handles,filename);
+                readData(handles,filename,'');
             end
             
             
@@ -350,11 +339,9 @@ function no_trigger_menu_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     if strcmp(config.trigger,'network')
         set(handles.network_rdbtn,'value',1);
-        %set(handles.network_menu_item,'Checked','On');
 
     elseif strcmp(config.trigger,'timer')
         set(handles.timer_rdbtn,'value',1);
-        %set(handles.timer_menu_item,'Checked','On');
     else
         set(handles.no_rdbtn,'value',1);
     end
@@ -382,11 +369,9 @@ function timer_menu_item_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     if strcmp(config.trigger,'network')
         set(handles.network_rdbtn,'value',1);
-        %set(handles.network_menu_item,'Checked','On');
 
     elseif strcmp(config.trigger,'timer')
         set(handles.timer_rdbtn,'value',1);
-        %set(handles.timer_menu_item,'Checked','On');
     else
         set(handles.no_rdbtn,'value',1);
     end    
@@ -628,7 +613,8 @@ function dp_menu_Callback(hObject, eventdata, handles)
     set(handles.dp_menu,'Checked','on');
     set(handles.cumpos,'Checked','off');
     set(handles.vel_menu,'Checked','off');
-
+    pop_Callback(hObject, eventdata, handles)
+    
 % --------------------------------------------------------------------
 function cumpos_Callback(hObject, eventdata, handles)
 % hObject    handle to cumpos (see GCBO)
@@ -637,7 +623,8 @@ function cumpos_Callback(hObject, eventdata, handles)
     set(handles.dp_menu,'Checked','off');
     set(handles.cumpos,'Checked','on');
     set(handles.vel_menu,'Checked','off');
-
+    pop_Callback(hObject, eventdata, handles)
+    
 % --------------------------------------------------------------------
 function vel_menu_Callback(hObject, eventdata, handles)
 % hObject    handle to vel_menu (see GCBO)
@@ -646,5 +633,5 @@ function vel_menu_Callback(hObject, eventdata, handles)
     set(handles.dp_menu,'Checked','off');
     set(handles.cumpos,'Checked','off');
     set(handles.vel_menu,'Checked','on');
-
+    pop_Callback(hObject, eventdata, handles)
             

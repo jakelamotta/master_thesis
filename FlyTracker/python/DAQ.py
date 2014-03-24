@@ -74,11 +74,9 @@ class MouseHandler(threading.Thread):
 				coordinates['y_2'] = 0
 
 			if self.pause and flag:
-				print 'savin pause'
 				utilities.FileHandler.saveToFile('pause','tempdata.txt','append')
 				flag = False
-
-			#coords = [0,0,0,0]		
+	
 		
 	def addMouse(self,mouse):
 		self.sensors.append(mouse)

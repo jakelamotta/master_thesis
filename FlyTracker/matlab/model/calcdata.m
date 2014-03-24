@@ -6,7 +6,7 @@ function [ data,concatdata ] = calcdata(output)
 %*******************************************************
 %Precondition:
 %Input format
-%Blocks separated by "*"
+%Blocks separated by "pause"
 %*******************************************************
 
 % blocks = parseInput(output);
@@ -65,7 +65,7 @@ len = length(starts);
 %dynamic values later
 alpha_ = .0160;
 omega = 0;%pi/4;
-r = 25; %mm
+r = 48.33/2; %mm
 
 side = zeros(1,len);
 forward = zeros(1,len);
@@ -86,14 +86,14 @@ for i=1:len
     w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
 
     w_mz = alpha_*(x1+x2)/(2*r);
-
+    
     side(i) = w_m(1);
     forward(i) = w_m(2);
     yaw(i) = w_mz;%*180/pi;    
     times(i) = .1.*time;
 end
-    data{1,1} = side;
-    data{2,1} = forward;
+    data{2,1} = side;
+    data{1,1} = forward;
     data{3,1} = yaw;
     data{4,1} = times;
     concatdata = data;    

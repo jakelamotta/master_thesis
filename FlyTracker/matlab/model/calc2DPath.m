@@ -5,8 +5,8 @@ function [x,y] = calc2DPath(data,block)
 
 len = length(data{3,block});
 
-forward = .1.*data{1,block};
-side = .1.*data{2,block};
+forward = data{1,block};
+side = data{2,block};
 yaw = cumsum(data{3,block});
 
 x = zeros(1,len);
@@ -17,12 +17,12 @@ y(1) = side(1);
 
 for i=2:len
     
-    x(i) = cos(yaw(i-1))*forward(i);
-    y(i) = sin(yaw(i-1))*forward(i);
+    x(i) = x(i-1)+cos(yaw(i-1))*side(i)-forward(i)*sin(yaw(i-1));
+    y(i) = y(i-1)+sin(yaw(i-1))*side(i)+forward(i)*cos(yaw(i-1));
 end
 
-x = cumsum(x);
-y = cumsum(y);
+%x = cumsum(x);
+%y = cumsum(y);
 
 end
 
