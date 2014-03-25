@@ -1,4 +1,4 @@
-function [ data,concatdata ] = calcdata(output)
+function [ data,concatdata ] = calcdata(output,yawMean)
 %Function that calculates the data for for the raw mouse input. output and
 %output_time has very specific restrictions on them, see help manual for
 %this. Returns data divided into blocks and the fully concatenated data
@@ -63,7 +63,7 @@ ends = strfind(output,'}');
 len = length(starts);
 
 %dynamic values later
-alpha_ = .0160;
+alpha_ = .0140;
 omega = 0;%pi/4;
 r = 48.33/2; %mm
 
@@ -85,7 +85,11 @@ for i=1:len
 
     w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
 
-    w_mz = alpha_*(x1+x2)/(2*r);
+    if yawMean > 0.0002
+        w_mz = alpha_*(x1+x2)/(2*r)
+    else
+        w_mz = 0;
+    end
     
     side(i) = w_m(1);
     forward(i) = w_m(2);
