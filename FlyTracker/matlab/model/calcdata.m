@@ -1,4 +1,4 @@
-function [ data,concatdata ] = calcdata(output,yawMean)
+function [ data,concatdata ] = calcdata(output)
 %Function that calculates the data for for the raw mouse input. output and
 %output_time has very specific restrictions on them, see help manual for
 %this. Returns data divided into blocks and the fully concatenated data
@@ -63,7 +63,7 @@ ends = strfind(output,'}');
 len = length(starts);
 
 %dynamic values later
-alpha_ = .0140;
+alpha_ = .0241;
 omega = 0;%pi/4;
 r = 48.33/2; %mm
 
@@ -79,22 +79,30 @@ for i=1:len
     temp = JSON.parse(output(starts(i):ends(i)));
     x1 = temp.x_1;
     x2 = temp.x_2;
-    y1 = temp.y_1;
-    y2 = temp.y_2;
+    y1 = temp.y_1/2;
+    y2 = temp.y_2/2;
     time = temp.t;
 
     w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
 
-    if yawMean > 0.0002
-        w_mz = alpha_*(x1+x2)/(2*r)
-    else
-        w_mz = 0;
+    if sign(x1) ~= sign(x2)
+        t = 0;
     end
+    
+    if sign(min(x1,x2)) == -1
+        t = max(x1,x2);
+    else
+        t = min(x1,x2);
+    end
+    
+    
+    w_mz = alpha_*t/(r);
+    %w_mz = w_mz - sign(w_mz)*yawMean;
     
     side(i) = w_m(1);
     forward(i) = w_m(2);
     yaw(i) = w_mz;%*180/pi;    
-    times(i) = .1.*time;
+    times(i) = .1*time;
 end
     data{2,1} = side;
     data{1,1} = forward;
