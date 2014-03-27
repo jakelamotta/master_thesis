@@ -63,9 +63,10 @@ ends = strfind(output,'}');
 len = length(starts);
 
 %dynamic values later
-alpha_ = .0241;
-omega = 0;%pi/4;
-r = 48.33/2; %mm
+alpha_ = 0.0213;%.1114;
+beta_ = .00145;
+omega = pi/4;
+r = config.radius; %mm
 
 side = zeros(1,len);
 forward = zeros(1,len);
@@ -79,23 +80,56 @@ for i=1:len
     temp = JSON.parse(output(starts(i):ends(i)));
     x1 = temp.x_1;
     x2 = temp.x_2;
-    y1 = temp.y_1/2;
-    y2 = temp.y_2/2;
+    y1 = temp.y_1;
+    y2 = temp.y_2;
     time = temp.t;
 
-    w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
+    w_m = beta_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
 
-    if sign(x1) ~= sign(x2)
-        t = 0;
-    end
+    t = (x1+x2)/r;
     
-    if sign(min(x1,x2)) == -1
+%     if sign(x1) ~= sign(x2) && sign(x1) ~= 0 && sign(x2) ~= 0
+%         t = 0;
+%     end
+    
+%     if sign(min(x1,x2)) == -1
+%         t = max(x1,x2);
+%     elseif sign(min(x1,x2)) == 1
+%         t = min(x1,x2);
+%     end
+    
+    if sign(x1) == -1 && sign(x2) == -1
         t = max(x1,x2);
-    else
+    elseif sign(x1)*sign(x2) == -1
+        if sign(x1) == -1
+            if abs(x1)<x2
+                if abs(x1)<t
+                    t = x1;
+                end
+            else
+                if x2<abs(t)
+                    t = x2;
+                end
+            end
+        elseif sign(x2) == -1
+            if abs(x2)<x1
+                if abs(x2)<t
+                    t = x2;
+                end
+            else
+                if x1<abs(t)
+                    t = x1;
+                end
+            end
+        end
+    elseif sign(x1) == 1 && sign(x2) == 1
         t = min(x1,x2);
     end
+
     
-    
+        
+        
+        
     w_mz = alpha_*t/(r);
     %w_mz = w_mz - sign(w_mz)*yawMean;
     
@@ -136,6 +170,8 @@ function [concatdata] = concatBlocks(data)
    end
 
 end
+
+
 
 function [ array_of_blocks ] = parseInput(filedata)
 %parseInput is a function for separating blocks of raw data from each other

@@ -41,7 +41,8 @@ class MouseHandler(threading.Thread):
 	#to lack of good solution for pausing it from the outside. 
 	def run(self):
 		global coords
-		
+		temporary = None
+
 		try:	
 			#Daemon threads are all closed (not clean close) when all non-daemon threads are terminated
 			self.s1.setDaemon(True)
@@ -64,10 +65,19 @@ class MouseHandler(threading.Thread):
 				if not flag:
 					flag = True
 				
-				coordinates['t'] = int(round((time.time()-start)*10000))
+				if temporary == None:
+					temporary = coordinates
+				else:
+					temporary['x_1'] = temporary['x_1']+coordinates['x_1']
+					temporary['x_2'] = temporary['x_2']+coordinates['x_2']
+					temporary['y_1'] = temporary['y_1']+coordinates['y_1']
+					temporary['y_2'] = temporary['y_2']+coordinates['y_2'] 
+					temporary['t'] = int(round((time.time()-start)*10000))
+					utilities.FileHandler.saveToFile(temporary,'tempdata.txt','append')
+					temporary = None
+				#coordinates['t'] = int(round((time.time()-start)*10000))
+				#utilities.FileHandler.saveToFile(coordinates,'tempdata.txt','append')	
 				
-				utilities.FileHandler.saveToFile(coordinates,'tempdata.txt','append')
-					
 				coordinates['x_1'] = 0
 				coordinates['x_2'] = 0
 				coordinates['y_1'] = 0

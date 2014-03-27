@@ -15,6 +15,7 @@ classdef Configuration < handle
         alpha_;
         theta; %In radians
         plotting;
+        radius;
     end
     
     methods (Access = 'public')
@@ -36,6 +37,22 @@ classdef Configuration < handle
         %%%%%%%%%%SETTERS%%%%%%%%%%%%%%%%
         function setNetworkTrigger(this,t)
             this.trigger = t;
+        end
+        
+        function setRadius(this,r)
+            if r > 0
+                this.radius = r;
+            else
+                errordlg('Radius must be a positive real number');
+            end
+        end
+        
+        function setAngle(this,a)
+            if r > 0
+                this.theta = a*(pi/180); %Convert to radians for future calculations
+            else
+                errordlg('Angle must be a positive real number');
+            end
         end
         
         function setRunnable(this,bool)
