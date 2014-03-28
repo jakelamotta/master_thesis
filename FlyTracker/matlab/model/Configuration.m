@@ -12,8 +12,9 @@ classdef Configuration < handle
         time;
         savepath;
         pwd;
+        beta_
         alpha_;
-        theta; %In radians
+        theta_; %In radians
         plotting;
         radius;
     end
@@ -30,7 +31,9 @@ classdef Configuration < handle
             this.savepath = getpath('','data');
             this.pwd = '';
             this.alpha_ = 1;
-            this.theta = pi/2;
+            this.beta_ = 1;
+            this.radius = 1;
+            this.theta_ = pi/2;
             this.plotting = 'cumsum';
         end   
         
@@ -48,8 +51,8 @@ classdef Configuration < handle
         end
         
         function setAngle(this,a)
-            if r > 0
-                this.theta = a*(pi/180); %Convert to radians for future calculations
+            if a > 0
+                this.theta_ = a*(pi/180); %Convert to radians for future calculations
             else
                 errordlg('Angle must be a positive real number');
             end

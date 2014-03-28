@@ -213,20 +213,21 @@ function stop_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to stop_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    config = getappdata(0,'config');
-    setappdata(0,'running', false);
-    
-    %Code for communicating with python process
-    fid = fopen(getpath('pipe','data'),'w');
-    fwrite(fid,'quit');      %Write quit command to the pipe
-    fclose(fid);             %Close pipe
-             
-    %Clean up, deleting the pipe
-    arg = ['rm -f ',getpath('pipe','data')];
-    system(arg);
-    
-    set(handles.run_btn,'String','Run');
-    drawnow;
+%     config = getappdata(0,'config');
+%     setappdata(0,'running', false);
+%     
+%     %Code for communicating with python process
+%     fid = fopen(getpath('pipe','data'),'w');
+%     fwrite(fid,'quit');      %Write quit command to the pipe
+%     fclose(fid);             %Close pipe
+%              
+%     %Clean up, deleting the pipe
+%     arg = ['rm -f ',getpath('pipe','data')];
+%     system(arg);
+%     
+%     set(handles.run_btn,'String','Run');
+%     drawnow;
+    stopAction(handles);
 
 % --- Executes on key press with focus on stop_btn and none of its controls.
 function stop_btn_KeyPressFcn(hObject, eventdata, handles)
@@ -236,21 +237,21 @@ function stop_btn_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-    config = getappdata(0,'config')
-    setappdata(0,'running', false);
-        
-    %Code for communicating with python process
-    fid = fopen(getpath('pipe','data'),'w');
-    fwrite(fid,'quit');      %Write quit command to the pipe
-    fclose(fid);             %Close pipe
-            
-    %Clean up, deleting the pipe
-    arg = ['rm -f ',getpath('pipe','data')];
-    system(arg);
-    
-    set(handles.run_btn,'String','Run');
-    drawnow;   
-
+%     config = getappdata(0,'config')
+%     setappdata(0,'running', false);
+%         
+%     %Code for communicating with python process
+%     fid = fopen(getpath('pipe','data'),'w');
+%     fwrite(fid,'quit');      %Write quit command to the pipe
+%     fclose(fid);             %Close pipe
+%             
+%     %Clean up, deleting the pipe
+%     arg = ['rm -f ',getpath('pipe','data')];
+%     system(arg);
+%     
+%     set(handles.run_btn,'String','Run');
+%     drawnow;   
+    stopAction(handles);
 % --------------------------------------------------------------------
 function manual_menu_item_Callback(hObject, eventdata, handles)
 % hObject    handle to manual_menu_item (see GCBO)

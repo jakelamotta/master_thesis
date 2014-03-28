@@ -92,7 +92,7 @@ function next_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to next_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    Calibration;
+    SetupSettings;
     close MouseID;
 
 % --- Executes on button press in prev_btn.

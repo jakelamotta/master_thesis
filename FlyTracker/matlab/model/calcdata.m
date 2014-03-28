@@ -9,64 +9,17 @@ function [ data,concatdata ] = calcdata(output)
 %Blocks separated by "pause"
 %*******************************************************
 
-% blocks = parseInput(output);
-% size_ = size(blocks);
-
-% for k=1:1
-%     %output = blocks{1,k};
-%     starts = strfind(output,'{');
-%     ends = strfind(output,'}');
-%     len = length(starts);
-% 
-%     %dynamic values later
-%     alpha_ = .0185;
-%     omega = 0;%pi/4;
-%     r = 25;
-% 
-%     side = zeros(1,len);
-%     forward = zeros(1,len);
-%     yaw = zeros(1,len);
-%     times = zeros(1,len);
-% 
-%     data = cell(4,1);
-% 
-% 
-%     for i=1:len
-%         temp = JSON.parse(output(starts(i):ends(i)));
-%         x1 = temp.x_1;
-%         x2 = temp.x_2;
-%         y1 = temp.y_1;
-%         y2 = temp.y_2;
-%         time = temp.t;
-% 
-%         w_m = alpha_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
-% 
-%         w_mz = alpha_*(x1+x2)/(2*r);
-% 
-%         side(i) = w_m(1);
-%         forward(i) = w_m(2);
-%         yaw(i) = w_mz;%*180/pi;    
-%         times(i) = time;
-%     end
-%     
-% end
-%     data{1,k} = side;
-%     data{2,k} = forward;
-%     data{3,k} = yaw;
-%     data{4,k} = times;
-%     concatdata = data;
-%     
-%     concatdata = concatBlocks(data);
+config = getappdata(0,'config');
 
 starts = strfind(output,'{');
 ends = strfind(output,'}');
 len = length(starts);
 
 %dynamic values later
-alpha_ = 0.0213;%.1114;
-beta_ = .00145;
-omega = pi/4;
-r = config.radius; %mm
+alpha_ = 1;%config.alpha_;%0.0213;%.1114;
+beta_ = 1;%config.beta_;%00145;
+omega = 0;%config.theta_;
+r = 24;%config.radius;%24;%config.radius; %mm
 
 side = zeros(1,len);
 forward = zeros(1,len);
@@ -86,17 +39,7 @@ for i=1:len
 
     w_m = beta_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
 
-    t = (x1+x2)/r;
-    
-%     if sign(x1) ~= sign(x2) && sign(x1) ~= 0 && sign(x2) ~= 0
-%         t = 0;
-%     end
-    
-%     if sign(min(x1,x2)) == -1
-%         t = max(x1,x2);
-%     elseif sign(min(x1,x2)) == 1
-%         t = min(x1,x2);
-%     end
+    t = (x1+x2)/2;
     
     if sign(x1) == -1 && sign(x2) == -1
         t = max(x1,x2);
@@ -131,10 +74,14 @@ for i=1:len
         
         
     w_mz = alpha_*t/(r);
-    %w_mz = w_mz - sign(w_mz)*yawMean;
     
     side(i) = w_m(1);
     forward(i) = w_m(2);
+    
+    if abs(w_mz)*180/pi < 2
+        w_mz = .3*w_mz;        
+    end
+    
     yaw(i) = w_mz;%*180/pi;    
     times(i) = .1*time;
 end
