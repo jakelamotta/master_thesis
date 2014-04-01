@@ -16,8 +16,8 @@ ends = strfind(output,'}');
 len = length(starts);
 
 %dynamic values later
-alpha_ = 1;%config.alpha_;%0.0213;%.1114;
-beta_ = 1;%config.beta_;%00145;
+alpha_ = .0213;%config.alpha_;%.1114;
+beta_ = .00145;%config.beta_;
 omega = 0;%config.theta_;
 r = 24;%config.radius;%24;%config.radius; %mm
 
@@ -78,8 +78,8 @@ for i=1:len
     side(i) = w_m(1);
     forward(i) = w_m(2);
     
-    if abs(w_mz)*180/pi < 2
-        w_mz = .3*w_mz;        
+    if abs(w_mz)*180/pi < 1.5
+        w_mz = .2*w_mz;        
     end
     
     yaw(i) = w_mz;%*180/pi;    
