@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 20-Mar-2014 12:04:09
+% Last Modified by GUIDE v2.5 02-Apr-2014 10:28:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -61,7 +61,7 @@ guidata(hObject, handles);
 % UIWAIT makes MainWindow wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
-config = getappdata(0,'config');
+config = getappdata(0,'config')
 
 set(handles.timer_edt,'String',config.time);
 
@@ -97,21 +97,13 @@ if exist(getpath('tempdata.txt','data'))
     q = questdlg('Something went wrong during the last recording and temporary data files havent been properly handled, do you want to recover the data?');
 
     if strcmp(q,'Yes')
-        [output] = opentempdata();
-        
-        if ~strcmp(output,'')
-            c = clock;
-            filename = strcat(config.savepath,'/recovereddata_',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
-            %displaydata(handles,output,filename);
-            %save(filename,
-        else
-            msgbox('No data was recorded!','Failure');
-        end
-    else
-        %Delete temp data files
-        delete(getpath('tempdata.txt','data'));
-        delete(getpath('blocktime.txt','data'));
+        c = clock;
+        filename = strcat(config.savepath,'/recovereddata_',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
+        handles
+        readData(handles,filename,'recovery');
     end
+    delete(getpath('tempdata.txt','data'));
+    delete(getpath('blocktime.txt','data'));
 end
 
 % --- Outputs from this function are returned to the command line.
@@ -237,20 +229,6 @@ function stop_btn_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
-%     config = getappdata(0,'config')
-%     setappdata(0,'running', false);
-%         
-%     %Code for communicating with python process
-%     fid = fopen(getpath('pipe','data'),'w');
-%     fwrite(fid,'quit');      %Write quit command to the pipe
-%     fclose(fid);             %Close pipe
-%             
-%     %Clean up, deleting the pipe
-%     arg = ['rm -f ',getpath('pipe','data')];
-%     system(arg);
-%     
-%     set(handles.run_btn,'String','Run');
-%     drawnow;   
     stopAction(handles);
 % --------------------------------------------------------------------
 function manual_menu_item_Callback(hObject, eventdata, handles)
@@ -636,3 +614,11 @@ function vel_menu_Callback(hObject, eventdata, handles)
     set(handles.vel_menu,'Checked','on');
     pop_Callback(hObject, eventdata, handles)
             
+
+
+% --------------------------------------------------------------------
+function flydir_Callback(hObject, eventdata, handles)
+% hObject    handle to flydir (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    

@@ -33,7 +33,7 @@ classdef Configuration < handle
             this.alpha_ = 1;
             this.beta_ = 1;
             this.radius = 1;
-            this.theta_ = pi/2;
+            this.theta_ = 0;
             this.plotting = 'cumsum';
         end   
         
@@ -51,7 +51,7 @@ classdef Configuration < handle
         end
         
         function setAngle(this,a)
-            if a > 0
+            if a > -180
                 this.theta_ = a*(pi/180); %Convert to radians for future calculations
             else
                 errordlg('Angle must be a positive real number');
@@ -100,8 +100,8 @@ classdef Configuration < handle
             this.alpha_ = a;
         end
         
-        function setTheta(this,t)
-            this.theta = t;
+        function setBeta(this,b)
+            this.beta_ = b;
         end
     end
     

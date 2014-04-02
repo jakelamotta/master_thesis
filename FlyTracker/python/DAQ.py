@@ -66,7 +66,7 @@ class MouseHandler(threading.Thread):
 				if not flag:
 					flag = True
 				
-				if counter < 5:
+				if counter < 4:
 					temporary['x_1'] = temporary['x_1']+coordinates['x_1']
 					temporary['x_2'] = temporary['x_2']+coordinates['x_2']
 					temporary['y_1'] = temporary['y_1']+coordinates['y_1']

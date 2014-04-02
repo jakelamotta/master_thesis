@@ -83,7 +83,7 @@ function cancel_btn_Callback(hObject, eventdata, handles)
     
     if strcmp(q,'Yes')
         MainApp;
-        close MouseID;
+        close 'Setup (3/6)';
         
     end
 
@@ -93,7 +93,7 @@ function next_btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     SetupSettings;
-    close MouseID;
+    close 'Setup (3/6)';
 
 % --- Executes on button press in prev_btn.
 function prev_btn_Callback(hObject, eventdata, handles)
@@ -101,7 +101,7 @@ function prev_btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     MiceSetup;
-    close MouseID;
+    close 'Setup (3/6)';
 
 % --- Executes on button press in id_btn. "Identify Mouse"
 function id_btn_Callback(hObject, eventdata, handles)

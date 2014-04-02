@@ -22,7 +22,7 @@ function varargout = MiceSetup(varargin)
 
 % Edit the above text to modify the response to help MiceSetup
 
-% Last Modified by GUIDE v2.5 11-Feb-2014 16:32:31
+% Last Modified by GUIDE v2.5 02-Apr-2014 11:35:38
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -78,7 +78,12 @@ function cancel_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to cancel_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+    q = questdlg('Are you sure you want to exit the configuration process? All changes will be lost');
+    
+    if strcmp(q,'Yes')
+        MainApp;
+        close 'Setup (2/6)';        
+    end
 
 % --- Executes on button press in next_btn.
 function next_btn_Callback(hObject, eventdata, handles)
@@ -86,12 +91,12 @@ function next_btn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     MouseID;
-    close MiceSetup;
+    close 'Setup (2/6)';
 
-% --- Executes on button press in prev_btn.
+% --- Executes on button press in cancel_btn.
 function prev_btn_Callback(hObject, eventdata, handles)
-% hObject    handle to prev_btn (see GCBO)
+% hObject    handle to cancel_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    MainApp;
-    close MiceSetup;
+    PwQuery('a');
+    close 'Setup (2/6)';
