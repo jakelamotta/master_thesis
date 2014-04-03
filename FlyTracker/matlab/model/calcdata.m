@@ -31,7 +31,7 @@ data = cell(4,1);
 
 for i=1:len
     temp = JSON.parse(output(starts(i):ends(i)));
-    x1 = temp.x_1;
+    x1 = temp.x_1-1;
     x2 = temp.x_2;
     y1 = temp.y_1;
     y2 = temp.y_2;
@@ -67,11 +67,7 @@ for i=1:len
         end
     elseif sign(x1) == 1 && sign(x2) == 1
         t = min(x1,x2);
-    end
-
-    
-        
-        
+    end 
         
     w_mz = alpha_*t/(r);
     
@@ -79,11 +75,11 @@ for i=1:len
     forward(i) = w_m(2);
     
     %%Scaling down small values
-    if abs(w_mz)*180/pi < 2.0
-        w_mz = w_mz*abs(w_mz)/2.0;        
-    end
+%     if abs(w_mz)*180/pi < 1.5 %((abs(x1)+abs(x2))/2)-((abs(y1)+abs(y2))/2) < 10
+%         w_mz = w_mz*.2;        
+%     end
     
-    yaw(i) = w_mz;%*180/pi;    
+    yaw(i) = w_mz;    
     times(i) = .1*time;
 end
     data{2,1} = side;
