@@ -17,6 +17,8 @@ classdef Configuration < handle
         theta_; %In radians
         plotting;
         radius;
+        forwardAxis;
+        sideAxis;
     end
     
     methods (Access = 'public')
@@ -35,6 +37,8 @@ classdef Configuration < handle
             this.radius = 1;
             this.theta_ = 0;
             this.plotting = 'cumsum';
+            this.forwardAxis = 1;
+            this.sideAxis = 2;
         end   
         
         %%%%%%%%%%SETTERS%%%%%%%%%%%%%%%%
@@ -84,9 +88,9 @@ classdef Configuration < handle
         end
         
         function setPlotting(this,p)
-            
             this.plotting = p;
         end
+        
         function setPort(this,p)
             %Validates portnumber before setting it
             if str2num(p) > 1024 && str2num(p) < 65535    
@@ -102,6 +106,11 @@ classdef Configuration < handle
         
         function setBeta(this,b)
             this.beta_ = b;
+        end
+        
+        function flipAxis(this)
+            this.forwardAxis = 3-this.forwardAxis;
+            this.sideAxis = 3-this.sideAxis;
         end
     end
     

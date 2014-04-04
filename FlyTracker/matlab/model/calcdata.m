@@ -19,7 +19,7 @@ len = length(starts);
 alpha_ = config.alpha_*-1;
 beta_ = config.beta_*-1;
 omega = config.theta_;
-r = config.radius; %mm
+r = config.radius/2; %mm
 
 side = zeros(1,len);
 forward = zeros(1,len);
@@ -89,52 +89,52 @@ end
     concatdata = data;    
 end
 
-%Function that concatenate all blocks in one data cell for each variable
-%respectively and the resulting cell will be a 4x1 cell. If the input is
-%already of this dimension the input is returned.
-function [concatdata] = concatBlocks(data)
-
-   len = size(data);
-      
-   %len(2) is number of blocks, if only one concatenating is not needed
-   if len(2) > 1
-       concatdata = cell(4,1);
-
-       for i=1:len(2)
-           if length(data{1,i}) ~= 0
-               concatdata{1,1} = [concatdata{1,1},data{1,i}];
-               concatdata{2,1} = [concatdata{2,1},data{2,i}];
-               concatdata{3,1} = [concatdata{3,1},data{3,i}];
-               concatdata{4,1} = [concatdata{4,1},data{4,i}];
-           end           
-       end
-   else
-       %Data is consisiting of one block only
-       concatdata = data;
-   end
-
-end
-
-
-
-function [ array_of_blocks ] = parseInput(filedata)
-%parseInput is a function for separating blocks of raw data from each other
-%return an array of strings, each containing data for one block
-
-    %filedata = transpose(filedata);
-    numBlocks = strfind(filedata,'*');
-    len = length(numBlocks);
-    
-    if len > 0
-        array_of_blocks = cell(1,len);
-    
-        array_of_blocks(1) = filedata(1:numBlocks(1)-1);
-    
-        for i=2:len-1
-            array_of_blocks(i) = filedata(numBlocks(i-1)+1:numBlocks(i)-1);
-        end
-    else
-        array_of_blocks = {filedata};
-    end
-    
-end
+% %Function that concatenate all blocks in one data cell for each variable
+% %respectively and the resulting cell will be a 4x1 cell. If the input is
+% %already of this dimension the input is returned.
+% function [concatdata] = concatBlocks(data)
+% 
+%    len = size(data);
+%       
+%    %len(2) is number of blocks, if only one concatenating is not needed
+%    if len(2) > 1
+%        concatdata = cell(4,1);
+% 
+%        for i=1:len(2)
+%            if length(data{1,i}) ~= 0
+%                concatdata{1,1} = [concatdata{1,1},data{1,i}];
+%                concatdata{2,1} = [concatdata{2,1},data{2,i}];
+%                concatdata{3,1} = [concatdata{3,1},data{3,i}];
+%                concatdata{4,1} = [concatdata{4,1},data{4,i}];
+%            end           
+%        end
+%    else
+%        %Data is consisiting of one block only
+%        concatdata = data;
+%    end
+% 
+% end
+% 
+% 
+% 
+% function [ array_of_blocks ] = parseInput(filedata)
+% %parseInput is a function for separating blocks of raw data from each other
+% %return an array of strings, each containing data for one block
+% 
+%     %filedata = transpose(filedata);
+%     numBlocks = strfind(filedata,'*');
+%     len = length(numBlocks);
+%     
+%     if len > 0
+%         array_of_blocks = cell(1,len);
+%     
+%         array_of_blocks(1) = filedata(1:numBlocks(1)-1);
+%     
+%         for i=2:len-1
+%             array_of_blocks(i) = filedata(numBlocks(i-1)+1:numBlocks(i)-1);
+%         end
+%     else
+%         array_of_blocks = {filedata};
+%     end
+%     
+% end
