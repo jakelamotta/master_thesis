@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 02-Apr-2014 10:28:17
+% Last Modified by GUIDE v2.5 07-Apr-2014 14:53:00
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -623,3 +623,11 @@ function flydir_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
     SetupSettings('notsetup');
     
+
+
+% --------------------------------------------------------------------
+function yawrot_Callback(hObject, eventdata, handles)
+% hObject    handle to yawrot (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    Calibration();

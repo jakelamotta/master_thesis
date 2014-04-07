@@ -33,11 +33,12 @@ for i=1:len
     temp = JSON.parse(output(starts(i):ends(i)));
     x1 = temp.x_1-1;
     x2 = temp.x_2;
+    
     y1 = temp.y_1;
     y2 = temp.y_2;
     time = temp.t;
 
-    w_m = beta_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y1;y2];
+    w_m = beta_.*[cos(omega),-sin(omega);sin(omega),cos(omega)]*[y2;y1];
 
     t = (x1+x2)/2;
     

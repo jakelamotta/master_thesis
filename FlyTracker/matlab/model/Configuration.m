@@ -108,9 +108,9 @@ classdef Configuration < handle
             this.beta_ = b;
         end
         
-        function flipAxis(this)
-            this.forwardAxis = 3-this.forwardAxis;
-            this.sideAxis = 3-this.sideAxis;
+        function flipAxis(this,forw)
+            this.forwardAxis = forw;
+            this.sideAxis = 3-forw;
         end
     end
     
