@@ -12,7 +12,7 @@ coords = []
 coordinates = {"x_1":0,"y_1":0,"x_2":0,"y_2":0,"t":0}
 runner = True
 mice_ = ['mouse0','mouse1','mouse2','mouse3','mouse4']
-defaultPort = 3000 #Default port value for the trigger server to be listening on
+defaultPort = 4444 #Default port value for the trigger server to be listening on
 pipe = utilities.Utilities.getPath('pipe')
 
 running = True
@@ -78,9 +78,6 @@ class MouseHandler(threading.Thread):
 					temporary = {"x_1":0,"y_1":0,"x_2":0,"y_2":0}
 					counter = 0
 
-				#coordinates['t'] = int(round((time.time()-start)*10000))
-				#utilities.FileHandler.saveToFile(coordinates,'tempdata.txt','append')	
-				
 				coordinates['x_1'] = 0
 				coordinates['x_2'] = 0
 				coordinates['y_1'] = 0

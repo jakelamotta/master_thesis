@@ -108,6 +108,7 @@ classdef Configuration < handle
             this.beta_ = b;
         end
         
+        %Each axis can only be 1 or 2 and exclusively so
         function flipAxis(this,forw)
             this.forwardAxis = forw;
             this.sideAxis = 3-forw;

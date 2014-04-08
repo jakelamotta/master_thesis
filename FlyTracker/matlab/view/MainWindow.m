@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 07-Apr-2014 14:53:00
+% Last Modified by GUIDE v2.5 08-Apr-2014 14:45:42
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -93,13 +93,12 @@ end
 
 %If tempdata still exists it means that the last run wasnt finished
 %properly, the data is still stored though. 
-if exist(getpath('tempdata.txt','data'))
+if exist(getpath('tempdata.txt','data'),'file')
     q = questdlg('Something went wrong during the last recording and temporary data files havent been properly handled, do you want to recover the data?');
 
     if strcmp(q,'Yes')
         c = clock;
         filename = strcat(config.savepath,'/recovereddata_',int2str(c(1)),'_',int2str(c(2)),'_',int2str(c(3)),'_',int2str(c(4)),'_',int2str(c(5)),'_',int2str(c(6)),'.mat');
-        handles
         readData(handles,filename,'recovery');
     end
     delete(getpath('tempdata.txt','data'));
@@ -122,13 +121,12 @@ function Untitled_1_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_1 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    
+
 % --------------------------------------------------------------------
 function Untitled_3_Callback(hObject, eventdata, handles)
 % hObject    handle to Untitled_3 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    
 
 % --- Executes on button press in run_btn.
 function run_btn_Callback(hObject, eventdata, handles)
@@ -168,6 +166,7 @@ function run_btn_Callback(hObject, eventdata, handles)
             elseif get(handles.timer_rdbtn,'value')
                 input = get(handles.timer_edt,'String');
                 
+                %Check that time input is actually a number
                 if isstrprop(input,'digit')
                     time = num2str(input);
                     arg = ['echo ',config.pwd,' | sudo -S python ',getpath('DAQ.py','py'),' "timer" "time"',' ',time,' &'];
@@ -205,20 +204,6 @@ function stop_btn_Callback(hObject, eventdata, handles)
 % hObject    handle to stop_btn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-%     config = getappdata(0,'config');
-%     setappdata(0,'running', false);
-%     
-%     %Code for communicating with python process
-%     fid = fopen(getpath('pipe','data'),'w');
-%     fwrite(fid,'quit');      %Write quit command to the pipe
-%     fclose(fid);             %Close pipe
-%              
-%     %Clean up, deleting the pipe
-%     arg = ['rm -f ',getpath('pipe','data')];
-%     system(arg);
-%     
-%     set(handles.run_btn,'String','Run');
-%     drawnow;
     stopAction(handles);
 
 % --- Executes on key press with focus on stop_btn and none of its controls.
@@ -561,11 +546,11 @@ function pop_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from pop
     
     fulldata = getappdata(0,'data');
-    block = get(handles.pop,'Value');
-    size_ = size(fulldata);
-    displaydata(fulldata,handles,size_,block);
-    
-
+    if ~isempty(fulldata)
+        block = get(handles.pop,'Value');
+        size_ = size(fulldata);
+        displaydata(fulldata,handles,size_,block);    
+    end
 % --- Executes during object creation, after setting all properties.
 function pop_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to pop (see GCBO)
@@ -630,4 +615,23 @@ function yawrot_Callback(hObject, eventdata, handles)
 % hObject    handle to yawrot (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    Calibration();
+    Calibration('notsetup');
+
+
+% --- Executes on key press with focus on run_btn and none of its controls.
+function run_btn_KeyPressFcn(hObject, eventdata, handles)
+% hObject    handle to run_btn (see GCBO)
+% eventdata  structure with the following fields (see UICONTROL)
+%	Key: name of the key that was pressed, in lower case
+%	Character: character interpretation of the key(s) that was pressed
+%	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
+% handles    structure with handles and user data (see GUIDATA)
+    run_btn_Callback(hObject, eventdata, handles)
+
+
+% --------------------------------------------------------------------
+function translation_Callback(hObject, eventdata, handles)
+% hObject    handle to translation (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+    TranslationCal('notsetup');
