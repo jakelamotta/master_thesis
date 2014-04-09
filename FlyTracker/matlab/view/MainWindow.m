@@ -22,7 +22,7 @@ function varargout = MainWindow(varargin)
 
 % Edit the above text to modify the response to help MainWindow
 
-% Last Modified by GUIDE v2.5 08-Apr-2014 14:45:42
+% Last Modified by GUIDE v2.5 09-Apr-2014 15:37:18
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -75,21 +75,14 @@ else
 end
 
 if strcmp(config.plotting,'cumsum')
-    set(handles.cumpos,'Checked','on');
-    titles = {'Forward position','Sideway position','Yaw position'};
-    y_axis = {'Position (mm)','Position (mm)','Position (degrees)'};
-    setplotdescription(handles,titles,y_axis);
+    cumpos_Callback(hObject, eventdata, handles);
 elseif strcmp(config.plotting,'delta')
-    set(handles.dp_menu,'Checked','on');
-    titles = {'Forward position','Sideway position','Yaw position'};
-    y_axis = {'Position (mm)','Position (mm)','Position (degrees)'};
-    setplotdescription(handles,titles,y_axis);
+    dp_menu_Callback(hObject, eventdata, handles);
 else
-    set(handles.vel_menu,'Checked','on');
-    titles = {'Forward velocity','Sideway velocity','Yaw velocity'};
-    y_axis = {'Velocity (m/s)','Velocity (m/s)','Velocity (degrees/s)'};
-    setplotdescription(handles,titles,y_axis);
+    vel_menu_Callback(hObject, eventdata, handles);
 end
+
+reset_menu_item_Callback(hObject, eventdata, handles);
 
 %If tempdata still exists it means that the last run wasnt finished
 %properly, the data is still stored though. 
@@ -368,7 +361,6 @@ function figure1_DeleteFcn(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
     %Saves GUI settings at shutdown
-
     config = getappdata(0,'config');
     
     if config.runnable
@@ -577,6 +569,9 @@ function dp_menu_Callback(hObject, eventdata, handles)
     set(handles.dp_menu,'Checked','on');
     set(handles.cumpos,'Checked','off');
     set(handles.vel_menu,'Checked','off');
+    titles = {'Forward position','Sideway position','Yaw position'};
+    y_axis = {'Position (mm)','Position (mm)','Position (degrees)'};
+    setplotdescription(handles,titles,y_axis);
     pop_Callback(hObject, eventdata, handles)
     
 % --------------------------------------------------------------------
@@ -587,6 +582,9 @@ function cumpos_Callback(hObject, eventdata, handles)
     set(handles.dp_menu,'Checked','off');
     set(handles.cumpos,'Checked','on');
     set(handles.vel_menu,'Checked','off');
+    titles = {'Forward position','Sideway position','Yaw position'};
+    y_axis = {'Position (mm)','Position (mm)','Position (degrees)'};
+    setplotdescription(handles,titles,y_axis);
     pop_Callback(hObject, eventdata, handles)
     
 % --------------------------------------------------------------------
@@ -597,6 +595,9 @@ function vel_menu_Callback(hObject, eventdata, handles)
     set(handles.dp_menu,'Checked','off');
     set(handles.cumpos,'Checked','off');
     set(handles.vel_menu,'Checked','on');
+    titles = {'Forward velocity','Sideway velocity','Yaw velocity'};
+    y_axis = {'Velocity (m/s)','Velocity (m/s)','Velocity (degrees/s)'};
+    setplotdescription(handles,titles,y_axis);
     pop_Callback(hObject, eventdata, handles)
             
 

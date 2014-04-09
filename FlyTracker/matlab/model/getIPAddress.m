@@ -1,9 +1,7 @@
 function ip = getIPAddress()
     %Simple function for finding ip address of localhost.
-    %Works on: Ubuntu 12.04 LTS,
-    %%%%%%%%%%%%%%%%%%%%%%5
+    %
     %Returns IP address as string
-    %%%%%%%%%%%%%%%%%%%%%%%%%%
     
     [~,result] = system('ifconfig');
     

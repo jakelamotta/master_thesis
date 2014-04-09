@@ -12,8 +12,6 @@ if len > 0
     side = data{2,block};
     yaw = cumsum(data{3,block});
 
-
-
     x(1) = forward(1);
     y(1) = side(1);
 
