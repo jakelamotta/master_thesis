@@ -123,7 +123,7 @@ function id_btn_Callback(hObject, eventdata, handles)
     %Functionality to strip the resulting output from any non-digit characters
     index = isstrprop(output,'digit');
     output(~index) = '';
-    output = output(find(index,1):end);
+    %output = output(find(index,1):end);
     
     try
         %If the ouput is of the proper form a succes-message will be shown

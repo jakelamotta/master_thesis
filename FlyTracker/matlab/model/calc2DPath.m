@@ -23,5 +23,8 @@ if len > 0
 
 end
 
+x = transpose(x);
+y = transpose(y);
+
 end
 

@@ -3,7 +3,7 @@ import time
 
 ####EDIT START##########
 
-path = '/home/kristian/master_thesis/' #set to location of FlyTracker folder
+path = '/home/kristian/' #set to location of FlyTracker folder
 
 ####EDIT STOP###########
 

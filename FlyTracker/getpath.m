@@ -10,7 +10,6 @@ prefixmodel = [tmp(1:end-length(mfilename)),'matlab/model/'];
 prefix = [tmp(1:end-length(mfilename)),'data/'];
 prefiximg = [tmp(1:end-length(mfilename)),'images/'];
 
-
 if strcmp(folder,'py')
     path = [prefixpy,file];
 elseif strcmp(folder,'view')
