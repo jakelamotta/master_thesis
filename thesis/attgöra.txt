@@ -1,0 +1,4 @@
+- kolla ref till agile manifesto
+- fixa formalia (referenser, figurer, tabeller, rubriker)
+- skriv abstract på svenska
+- Innehållsförteckning
